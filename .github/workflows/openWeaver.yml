@@ -58,28 +58,28 @@ jobs:
       run: |
         cd build && make -j4 beacon_all
         mv beacon/beacon beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}
-        aws s3 cp beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}
+        aws s3 cp beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/
     - name: Make eth_relay
       if: ${{github.event.inputs.eth_relay-version != 'nil'}}
       run: |
         cd build && make -j4 eth_relay
         mv relay/eth_relay relay/eth_relay-${{matrix.GOOS}}_${{matrix.GOARCH}}
-        aws s3 cp relay/eth_relay-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/eth_relay/${{github.event.inputs.eth_relay-version}}
+        aws s3 cp relay/eth_relay-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/eth_relay/${{github.event.inputs.eth_relay-version}}/
     - name: Make gateway_eth
       if: ${{github.event.inputs.gateway_eth-version != 'nil'}}
       run: |
         cd build && make -j4 onramp-eth
         mv integrations/eth/onramp_eth integrations/eth/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
-        aws s3 cp integrations/eth/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}
+        aws s3 cp integrations/eth/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/
     - name: Make near_gateway
       if: ${{github.event.inputs.near_gateway-version != 'nil'}}
       run: |
         cd build && make -j4 near_gateway
         mv integrations/near/near_gateway integrations/near/near_gateway-${{matrix.GOOS}}_${{matrix.GOARCH}}
-        aws s3 cp integrations/near/near_gateway-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/near_gateway/${{github.event.inputs.near_gateway-version}}
+        aws s3 cp integrations/near/near_gateway-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/near_gateway/${{github.event.inputs.near_gateway-version}}/
     - name: Make iris_bridge
       if: ${{github.event.inputs.iris_bridge-version != 'nil'}}
       run: |
         cd build && make -j4 iris_bridge
         mv multicastsdk/iris_bridge multicastsdk/iris_bridge-${{matrix.GOOS}}_${{matrix.GOARCH}}
-        aws s3 cp multicastsdk/iris_bridge-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/iris_bridge/${{github.event.inputs.iris_bridge-version}}
+        aws s3 cp multicastsdk/iris_bridge-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/iris_bridge/${{github.event.inputs.iris_bridge-version}}/
