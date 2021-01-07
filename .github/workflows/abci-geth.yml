@@ -1,0 +1,33 @@
+name: Build acbi-geth
+on: 
+ workflow_dispatch:
+  inputs:
+   version:
+    description: 'geth binary version'
+    required: true
+    default: '1.0'
+jobs:
+  build_abci-geth:
+    name: Build abci-geth
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        repository: marlinprotocol/abci-geth
+        submodules: recursive
+    - name: Make
+      run: make geth
+   - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Upload
+      run: |
+       aws s3 cp build/bin/geth s3://beta.artifacts.marlin.pro/projects/geth/${{github.event.inputs.version}}/geth-${{github.event.inputs.version}}-linux_amd64
