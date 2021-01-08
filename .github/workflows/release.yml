@@ -35,4 +35,4 @@ jobs:
     - name: copy binary
       if: ${{github.event.inputs.project-name != 'nil'}}
       run: |
-        aws s3 cp s3://beta.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-beta}}/* s3://public.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}/
+        aws s3 cp s3://beta.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}/* s3://public.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}/
