@@ -36,6 +36,7 @@ jobs:
      steps:
      - uses: actions/checkout@v2
        with:
+        token: ${{ secrets.PAT }}
         ref: beta
         repository: marlinprotocol/releases
         submodules: recursive
@@ -47,8 +48,7 @@ jobs:
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-          committer: WhiteWalker608 <WhiteWalker@github.com>
+          token: ${{ secrets.PAT }}
           branch: auto
           delete-branch: true
           branch-suffix: timestamp
