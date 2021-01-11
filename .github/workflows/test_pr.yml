@@ -69,8 +69,8 @@ jobs:
        if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
        run: |
          echo ${{needs.build_openweaver_linux.outputs.beacon_checksum}}
-         #pip install semantic_version
-         #python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon_checksum}}"
+         pip install semantic_version
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon_checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
