@@ -1,0 +1,55 @@
+name: Build OpenWeaver
+on:
+  workflow_dispatch:
+   inputs:
+    beacon-version:
+     description: 'beacon binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    eth_relay-version:
+     description: 'eth_relay binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    gateway_eth-version:
+     description: 'gateway_eth binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    near_gateway-version:
+     description: 'near_gateway binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    iris_bridge-version:
+     description: 'iris_bridge binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+jobs:  
+  create-pr:
+     name: create releases pr
+     needs: build_openweaver_linux
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit beacon
+       if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
+       run: |
+         pip install semantic_version
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "test_checksum"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          branch: auto
+          delete-branch: true
+          branch-suffix: timestamp
+          title: 'Update Build'
