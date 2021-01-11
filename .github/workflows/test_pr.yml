@@ -46,7 +46,7 @@ jobs:
       if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
       run: |
         echo $(md5sum script.py | awk '{print $1;}')
-        echo ::set-output name=checksum::nitin
+        echo "::set-output name=checksum::nitin"
   create-pr:
      needs: build_openweaver_linux
      name: create releases pr
