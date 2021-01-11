@@ -25,7 +25,6 @@ on:
 jobs:  
   create-pr:
      name: create releases pr
-     needs: build_openweaver_linux
      strategy:
       matrix:
         include:
