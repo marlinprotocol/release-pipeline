@@ -116,11 +116,14 @@ jobs:
        
   create-pr:
      name: create releases pr
-     needs: [build_openweaver_linux]
+     needs: build_openweaver_linux
      strategy:
       matrix:
-        os: ['ubuntu-18.04']
-        build_type: [Release]
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
      runs-on: ${{ matrix.os }}
      steps:
      - uses: actions/checkout@v2
@@ -132,7 +135,7 @@ jobs:
        if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
-         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" ${{needs.build_openweaver_linux.outputs.beacon_checksum}} 
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon_checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
