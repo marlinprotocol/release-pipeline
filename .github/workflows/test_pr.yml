@@ -48,6 +48,7 @@ jobs:
        uses: peter-evans/create-pull-request@v3
        with:
           token: ${{secrets.GITHUB_TOKEN}}
+          committer: WhiteWalker608 <WhiteWalker@github.com>
           branch: auto
           delete-branch: true
           branch-suffix: timestamp
