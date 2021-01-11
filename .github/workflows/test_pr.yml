@@ -1,4 +1,4 @@
-name: Build OpenWeaver
+name: Test PR
 on:
   workflow_dispatch:
    inputs:
