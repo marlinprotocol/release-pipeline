@@ -23,7 +23,32 @@ on:
      required: false
      default: 'X.Y.Z-beta.U'
 jobs:  
+  build_openweaver_linux:
+    name: Build openWeaver linux
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    outputs:
+      beacon_checksum: ${{steps.beacon.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+    - name: Make beacon
+      id: beacon
+      if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
+      run: |
+        echo $(md5sum script.py | awk '{print $1;}')
+        echo ::set-output name=checksum::nitin
   create-pr:
+     needs: build_openweaver_linux
      name: create releases pr
      strategy:
       matrix:
@@ -44,7 +69,7 @@ jobs:
        if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
-         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "test_checksum"
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon_checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
