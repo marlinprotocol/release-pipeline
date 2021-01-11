@@ -33,6 +33,8 @@ jobs:
           GOOS: linux
           GOARCH: amd64
     runs-on: ${{ matrix.os }}
+    outputs:
+      beacon_checksum: ${{steps.beacon.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -54,9 +56,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-southeast-1
     - name: Make beacon
+      id: beacon
       if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 beacon_all
+        echo ::set-output name=checksum::$(md5sum beacon/beacon | awk '{print $1;}')
         mv beacon/beacon beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/
     - name: Make eth_relay
@@ -109,3 +113,29 @@ jobs:
     - name: Upload
       run: |
        aws s3 cp build/bin/geth s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.eth_relay-version}}/geth-${{github.event.inputs.eth_relay-version}}-linux_amd64
+       
+  create-pr:
+     name: create releases pr
+     needs: [build_openweaver_linux]
+     strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit beacon
+       if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
+       run: |
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}//beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" ${{needs.build_openweaver_linux.outputs.beacon_checksum}} 
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          branch: auto
+          delete-branch: true
+          branch-suffix: timestamp
+          title: 'Update Build'
