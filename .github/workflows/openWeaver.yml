@@ -5,23 +5,23 @@ on:
     beacon-version:
      description: 'beacon binary version'
      required: false
-     default: 'nil'
+     default: 'X.Y.Z-beta.U'
     eth_relay-version:
      description: 'eth_relay binary version'
      required: false
-     default: 'nil'
+     default: 'X.Y.Z-beta.U'
     gateway_eth-version:
      description: 'gateway_eth binary version'
      required: false
-     default: 'nil'
+     default: 'X.Y.Z-beta.U'
     near_gateway-version:
      description: 'near_gateway binary version'
      required: false
-     default: 'nil'
+     default: 'X.Y.Z-beta.U'
     iris_bridge-version:
      description: 'iris_bridge binary version'
      required: false
-     default: 'nil'
+     default: 'X.Y.Z-beta.U'
 jobs: 
   build_openweaver_linux:
     name: Build openWeaver linux
@@ -54,38 +54,38 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-southeast-1
     - name: Make beacon
-      if: ${{github.event.inputs.beacon-version != 'nil'}}
+      if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 beacon_all
         mv beacon/beacon beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/
     - name: Make eth_relay
-      if: ${{github.event.inputs.eth_relay-version != 'nil'}}
+      if: ${{github.event.inputs.eth_relay-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 eth_relay
         mv relay/eth_relay relay/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp relay/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.eth_relay-version}}/
     - name: Make gateway_eth
-      if: ${{github.event.inputs.gateway_eth-version != 'nil'}}
+      if: ${{github.event.inputs.gateway_eth-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 onramp-eth
         mv integrations/eth/onramp_eth integrations/eth/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp integrations/eth/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/
     - name: Make near_gateway
-      if: ${{github.event.inputs.near_gateway-version != 'nil'}}
+      if: ${{github.event.inputs.near_gateway-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 near_gateway
         mv integrations/near/near_gateway integrations/near/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp integrations/near/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/gateway_near/${{github.event.inputs.near_gateway-version}}/
     - name: Make iris_bridge
-      if: ${{github.event.inputs.iris_bridge-version != 'nil'}}
+      if: ${{github.event.inputs.iris_bridge-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 iris_bridge
         mv multicastsdk/iris_bridge multicastsdk/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp multicastsdk/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.iris_bridge-version}}/
   
   build_abci-geth:
-    if: ${{github.event.inputs.eth_relay-version != 'nil'}}
+    if: ${{github.event.inputs.eth_relay-version != 'X.Y.Z-beta.U'}}
     name: Build abci-geth
     strategy:
       matrix:
