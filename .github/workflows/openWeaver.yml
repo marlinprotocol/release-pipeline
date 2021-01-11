@@ -34,7 +34,7 @@ jobs:
           GOARCH: amd64
     runs-on: ${{ matrix.os }}
     outputs:
-      beacon_checksum: ${{steps.beacon.checksum}}
+      beacon_checksum: ${{steps.beacon.outputs.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -60,7 +60,7 @@ jobs:
       if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 beacon_all
-        echo ::set-output name=checksum::$(md5sum beacon/beacon | awk '{print $1;}')
+        echo "::set-output name=checksum::$(md5sum beacon/beacon | awk '{print $1;}')"
         mv beacon/beacon beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}
         aws s3 cp beacon/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}} s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/
     - name: Make eth_relay
@@ -128,6 +128,7 @@ jobs:
      steps:
      - uses: actions/checkout@v2
        with:
+        token: ${{ secrets.PAT }}
         ref: beta
         repository: marlinprotocol/releases
         submodules: recursive
@@ -139,7 +140,7 @@ jobs:
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
-          branch: auto
+          token: ${{ secrets.PAT }}
+          branch: auto-beacon-${{github.event.inputs.beacon-version}}
           delete-branch: true
-          branch-suffix: timestamp
           title: 'Update Build'
