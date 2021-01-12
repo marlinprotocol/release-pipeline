@@ -14,6 +14,10 @@ on:
      description: 'beta version'
      required: true
      default: 'beta.1'
+    description:
+     description: 'changes'
+     required: true
+     default: 'describe the changes here'
 jobs: 
   release_binaries:
     name: Make Binary public
@@ -35,4 +39,36 @@ jobs:
     - name: copy binary
       if: ${{github.event.inputs.project-name != 'nil'}}
       run: |
-        aws s3 cp --recursive s3://beta.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-beta}}/ s3://public.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}/
+        aws s3 cp --recursive s3://beta.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-version-beta}}/ s3://public.artifacts.marlin.pro/projects/${{github.event.inputs.project-name}}/${{github.event.inputs.project-version-main}}/
+
+  create-pr:
+     name: create PR
+     needs: release_binaries
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: public
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         curl -o temp.json  https://raw.githubusercontent.com/marlinprotocol/releases/beta/projects/${{github.event.inputs.project-name}}/releases.json
+         pip install semantic_version
+         python scripts/script_release.py ${{github.event.inputs.project-name}} temp.json "projects/${{github.event.inputs.project-name}}/releases.json" ${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-version-beta}} ${{github.event.inputs.description}}
+         rm temp.json
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-public-${{github.event.inputs.project-name}}-${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-version-beta}}
+          delete-branch: true
+          title: '${{github.event.inputs.description}}'
