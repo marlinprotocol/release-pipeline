@@ -127,6 +127,7 @@ jobs:
        
   create-pr-beacon:
      name: create PR beacon
+     if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
      needs: build_openweaver_linux
      strategy:
       matrix:
@@ -144,7 +145,6 @@ jobs:
         repository: marlinprotocol/releases
         submodules: recursive
      - name: edit
-       if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
          python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "automated" beacon "s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon-checksum}}"
@@ -158,6 +158,7 @@ jobs:
   
   create-pr-relay_eth:
      name: create PR relay_eth
+     if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
      needs: [build_openweaver_linux, build_abci-geth]
      strategy:
       matrix:
@@ -175,7 +176,6 @@ jobs:
         repository: marlinprotocol/releases
         submodules: recursive
      - name: edit
-       if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
          python script.py "projects/relay_eth/releases.json" ${{github.event.inputs.relay_eth-version}} "automated" relay "s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_eth-checksum}}" geth "s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64" "${{needs.build_abci-geth.outputs.geth-checksum}}"
@@ -189,6 +189,7 @@ jobs:
           
   create-pr-gateway_eth:
      name: create PR gateway_eth
+     if: ${{github.event.inputs.gateway_eth-version != 'X.Y.Z-beta.U'}}
      needs: build_openweaver_linux
      strategy:
       matrix:
@@ -206,7 +207,6 @@ jobs:
         repository: marlinprotocol/releases
         submodules: recursive
      - name: edit
-       if: ${{github.event.inputs.gateway_eth-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
          python script.py "projects/gateway_eth/releases.json" ${{github.event.inputs.gateway_eth-version}} "automated" gateway "s3://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_eth-checksum}}"
@@ -220,6 +220,7 @@ jobs:
 
   create-pr-gateway_near:
      name: create PR gateway_near
+     if: ${{github.event.inputs.gateway_near-version != 'X.Y.Z-beta.U'}}
      needs: build_openweaver_linux
      strategy:
       matrix:
@@ -237,7 +238,6 @@ jobs:
         repository: marlinprotocol/releases
         submodules: recursive
      - name: edit
-       if: ${{github.event.inputs.gateway_near-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
          python script.py "projects/gateway_near/releases.json" ${{github.event.inputs.gateway_near-version}} "automated" gateway "s3://beta.artifacts.marlin.pro/projects/gateway_near/${{github.event.inputs.gateway_near-version}}/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_near-checksum}}"
@@ -251,6 +251,7 @@ jobs:
   
   create-pr-gateway_iris:
      name: create PR gateway_iris
+     if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
      needs: build_openweaver_linux
      strategy:
       matrix:
@@ -268,7 +269,6 @@ jobs:
         repository: marlinprotocol/releases
         submodules: recursive
      - name: edit
-       if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
        run: |
          pip install semantic_version
          python script.py "projects/gateway_iris/releases.json" ${{github.event.inputs.gateway_iris-version}} "automated" gateway "s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_iris-checksum}}"
