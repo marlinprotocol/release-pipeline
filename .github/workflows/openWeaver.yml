@@ -150,6 +150,10 @@ jobs:
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > temp
         chmod 777 temp
         ./temp -y
+        echo $(rustc --version)
+        rustup toolchain install 1.47.0
+        rustup override set 1.47.0
+        echo $(rustc --version)
     - name: Build
       run: cargo build --release --all-features
     - name: Configure AWS credentials
