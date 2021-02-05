@@ -146,7 +146,7 @@ jobs:
         repository: marlinprotocol/polkadot-integration
         submodules: recursive
     - name: Install Rust
-      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y
     - name: Build
       run: cargo build --release --all-features
     - name: Configure AWS credentials
