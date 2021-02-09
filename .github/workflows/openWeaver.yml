@@ -198,6 +198,11 @@ jobs:
     - name: install protoc
       run: |
         sudo apt-get install autoconf automake libtool curl make g++ unzip
+        PROTOC_ZIP=protoc-3.14.0-osx-x86_64.zip
+        curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/$PROTOC_ZIP
+        sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
+        sudo unzip -o $PROTOC_ZIP -d /usr/local 'include/*'
+        rm -f $PROTOC_ZIP
         go install google.golang.org/protobuf/cmd/protoc-gen-go
     - name: Make iris
       id: gateway_iris
