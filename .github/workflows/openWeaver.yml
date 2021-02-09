@@ -52,6 +52,7 @@ jobs:
       gateway_near-checksum: ${{steps.gateway_near.outputs.checksum}}
       gateway_iris-checksum: ${{steps.gateway_iris.outputs.checksum}}
       gateway_dot-checksum: ${{steps.gateway_dot.outputs.checksum}}
+      gateway_cosmos-checksum: ${{steps.gateway_cosmos.outputs.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -114,6 +115,13 @@ jobs:
         cd build && make -j4 dot_bridge
         echo "::set-output name=checksum::$(md5sum multicastsdk/dot_bridge | awk '{print $1;}')"
         aws s3 cp multicastsdk/dot_bridge s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_cosmos
+      id: gateway_cosmos
+      if: ${{github.event.inputs.gateway_cosmos-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 cosmos_bridge
+        echo "::set-output name=checksum::$(md5sum multicastsdk/cosmos_bridge | awk '{print $1;}')"
+        aws s3 cp multicastsdk/cosmos_bridge s3://beta.artifacts.marlin.pro/projects/gateway_cosmos/${{github.event.inputs.gateway_cosmos-version}}/bridge_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}
 
   build_abci-geth:
     if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
