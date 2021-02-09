@@ -2,6 +2,10 @@ name: Build OpenWeaver
 on:
   workflow_dispatch:
    inputs:
+    openweaver-branch:
+     description: 'openweaver branch'
+     required: false
+     default: 'master'
     beacon-version:
      description: 'beacon binary version'
      required: false
@@ -46,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: privkey_creation
+        ref: ${{github.event.inputs.beacon-version}}
         repository: marlinprotocol/OpenWeaver
         submodules: recursive
     - name: install doxygen
