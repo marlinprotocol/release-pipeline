@@ -378,7 +378,7 @@ jobs:
   create-pr-gateway_iris:
      name: create PR gateway_iris
      if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
-     needs: build_openweaver_linux
+     needs: [build_openweaver_linux, build_gateway_iris_cosmos]
      strategy:
       matrix:
         include:
@@ -408,7 +408,7 @@ jobs:
   create-pr-gateway_dot:
      name: create PR gateway_dot
      if: ${{github.event.inputs.gateway_dot-version != 'X.Y.Z-beta.U'}}
-     needs: build_gateway_dot
+     needs: [build_openweaver_linux, build_gateway_dot]
      strategy:
       matrix:
         include:
