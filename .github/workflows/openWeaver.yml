@@ -156,11 +156,13 @@ jobs:
         submodules: recursive
     - name: Parse semver string iris
       id: semver_parser-iris
+      if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
       uses: booxmedialtd/ws-action-parse-semver@v1
       with:
         input_string: ${{github.event.inputs.gateway_iris-version}}
     - name: Parse semver string cosmos
       id: semver_parser-cosmos
+      if: ${{github.event.inputs.gateway_cosmos-version != 'X.Y.Z-beta.U'}}
       uses: booxmedialtd/ws-action-parse-semver@v1
       with:
         input_string: ${{github.event.inputs.gateway_cosmos-version}}
