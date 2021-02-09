@@ -54,7 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{github.event.inputs.beacon-version}}
+        ref: ${{github.event.inputs.openweaver-branch}}
         repository: marlinprotocol/OpenWeaver
         submodules: recursive
     - name: install doxygen
