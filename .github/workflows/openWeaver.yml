@@ -51,6 +51,7 @@ jobs:
       gateway_eth-checksum: ${{steps.gateway_eth.outputs.checksum}}
       gateway_near-checksum: ${{steps.gateway_near.outputs.checksum}}
       gateway_iris-checksum: ${{steps.gateway_iris.outputs.checksum}}
+      gateway_dot-checksum: ${{steps.gateway_dot.outputs.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -106,7 +107,14 @@ jobs:
         cd build && make -j4 iris_bridge
         echo "::set-output name=checksum::$(md5sum multicastsdk/iris_bridge | awk '{print $1;}')"
         aws s3 cp multicastsdk/iris_bridge s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
-  
+    - name: Make gateway_dot
+      id: gateway_dot
+      if: ${{github.event.inputs.gateway_dot-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 dot_bridge
+        echo "::set-output name=checksum::$(md5sum multicastsdk/dot_bridge | awk '{print $1;}')"
+        aws s3 cp multicastsdk/dot_bridge s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}
+
   build_abci-geth:
     if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
     name: Build abci-geth
@@ -411,7 +419,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_dot/releases.json" ${{github.event.inputs.gateway_dot-version}} "automated" gateway "s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_dot.outputs.gateway_dot-checksum}}"
+         python script.py "projects/gateway_dot/releases.json" ${{github.event.inputs.gateway_dot-version}} "automated" gateway "s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_dot.outputs.gateway_dot-checksum}}" bridge "s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_dot-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
