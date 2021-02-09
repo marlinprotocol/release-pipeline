@@ -45,6 +45,9 @@ jobs:
           GOOS: linux
           GOARCH: amd64
     runs-on: ${{ matrix.os }}
+    env: 
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
     outputs:
       beacon-checksum: ${{steps.beacon.outputs.checksum}}
       relay_eth-checksum: ${{steps.relay_eth.outputs.checksum}}
@@ -63,8 +66,6 @@ jobs:
       run: |
         echo "$(gcc --version)"
         echo "$(clang --version)"
-        export CC=/usr/bin/clang
-        export CXX=/usr/bin/clang++
     - name: install doxygen
       run: sudo apt-get install doxygen
     - name: install graphviz dot
@@ -208,7 +209,7 @@ jobs:
       id: gateway_iris
       if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
       run: |
-        make release-iris
+        sudo make release-iris
         echo "::set-output name=checksum::$(md5sum build/iris_gateway | awk '{print $1;}')"
         aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
       env: 
@@ -217,7 +218,7 @@ jobs:
       id: gateway_cosmos
       if: ${{github.event.inputs.gateway_cosmos-version != 'X.Y.Z-beta.U'}}
       run: |
-        make release-cosmos
+        sudo make release-cosmos
         echo "::set-output name=checksum::$(md5sum build/cosmos_gateway | awk '{print $1;}')"
         aws s3 cp build/cosmos_gateway s3://beta.artifacts.marlin.pro/projects/gateway_cosmos/${{github.event.inputs.gateway_cosmos-version}}/gateway_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}
       env: 
