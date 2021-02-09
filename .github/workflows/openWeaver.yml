@@ -59,6 +59,12 @@ jobs:
         ref: ${{github.event.inputs.openweaver-branch}}
         repository: marlinprotocol/OpenWeaver
         submodules: recursive
+    - name: set c++ version
+      run: |
+        echo "$(gcc --version)"
+        echo "$(clang --version)"
+        export CC=/usr/bin/clang
+        export CXX=/usr/bin/clang++
     - name: install doxygen
       run: sudo apt-get install doxygen
     - name: install graphviz dot
