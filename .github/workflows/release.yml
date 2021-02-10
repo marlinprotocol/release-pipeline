@@ -63,7 +63,7 @@ jobs:
        run: |
          curl -o temp.json  https://raw.githubusercontent.com/marlinprotocol/releases/beta/projects/${{github.event.inputs.project-name}}/releases.json
          pip install semantic_version
-         python scripts/script_release.py ${{github.event.inputs.project-name}} temp.json "projects/${{github.event.inputs.project-name}}/releases.json" ${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-version-beta}} ${{github.event.inputs.description}}
+         python scripts/script_release.py ${{github.event.inputs.project-name}} temp.json "projects/${{github.event.inputs.project-name}}/releases.json" ${{github.event.inputs.project-version-main}}-${{github.event.inputs.project-version-beta}} "${{github.event.inputs.description}}"
          rm temp.json
      - name: pr
        uses: peter-evans/create-pull-request@v3
