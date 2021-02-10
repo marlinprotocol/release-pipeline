@@ -38,7 +38,30 @@ on:
      description: 'description for new version'
      required: false
      default: 'automated'
-jobs: 
+jobs:
+  echo_input:
+    name: display input params
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-20.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: echo
+      run: |
+        echo openweaver-branch ${{github.event.inputs.openweaver-branch}}
+        echo beacon-version ${{github.event.inputs.beacon-version}}
+        echo relay_eth-version ${{github.event.inputs.relay_eth-version}}
+        echo gateway_eth-version ${{github.event.inputs.gateway_eth-version}}
+        echo gateway_near-version ${{github.event.inputs.gateway_near-version}}
+        echo gateway_iris-version ${{github.event.inputs.gateway_iris-version}}
+        echo gateway_dot-version ${{github.event.inputs.gateway_dot-version}}
+        echo gateway_cosmos-version ${{github.event.inputs.gateway_cosmos-version}}
+        echo version-description ${{github.event.inputs.version-description}}
+        
   build_openweaver_linux:
     name: Build openWeaver linux
     strategy:
