@@ -238,7 +238,8 @@ jobs:
         echo "$PATH"
         which protoc
         which protoc-gen-go
-        ls /home/runner/go/bin
+        ls -lath /home/runner/go/bin
+        echo "-----"
         sudo make release-iris
         echo "::set-output name=checksum::$(md5sum build/iris_gateway | awk '{print $1;}')"
         aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
