@@ -195,6 +195,8 @@ jobs:
         os: ['ubuntu-20.04']
         build_type: [Release]
     runs-on: ${{ matrix.os }}
+    env: 
+      GO111MODULE: on
     outputs:
       gateway_cosmos-checksum: ${{steps.gateway_cosmos.outputs.checksum}}
       gateway_iris-checksum: ${{steps.gateway_iris.outputs.checksum}}
@@ -226,10 +228,9 @@ jobs:
     - name: install protoc
       run: |
         echo "/home/runner/go/bin" >> $GITHUB_PATH
-        sudo apt-get update
-        sudo apt-get -y upgrade
+        go get google.golang.org/protobuf/cmd/protoc-gen-go
+        go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
         sudo apt install protobuf-compiler
-        go get -u github.com/golang/protobuf/{protoc-gen-go}
     - name: Make iris
       id: gateway_iris
       if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
@@ -241,9 +242,7 @@ jobs:
         sudo make release-iris
         echo "::set-output name=checksum::$(md5sum build/iris_gateway | awk '{print $1;}')"
         aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
-      env:
-        GOPATH: /home/runner/go
-        GOBIN: /home/runner/go/bin  
+      env: 
         TENDERMINTCONNECTORBUILDVERSIONSTRING: ${{steps.semver_parser-iris.outputs.major}}.${{steps.semver_parser-iris.outputs.minor}}.${{steps.semver_parser-iris.outputs.patch}}
     - name: Make cosmos
       id: gateway_cosmos
