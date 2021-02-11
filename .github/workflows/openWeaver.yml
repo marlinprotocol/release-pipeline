@@ -226,10 +226,7 @@ jobs:
     - name: install protoc
       run: |
         echo "/home/runner/go/bin" >> $GITHUB_PATH
-        sudo apt-get update
-        sudo apt-get -y upgrade
-        sudo apt install protobuf-compiler
-        go get -u github.com/golang/protobuf/protoc-gen-go
+        go get -u github.com/golang/protobuf/{protoc,protoc-gen-go}
     - name: Make iris
       id: gateway_iris
       if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
