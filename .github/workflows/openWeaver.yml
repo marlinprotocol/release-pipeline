@@ -232,6 +232,7 @@ jobs:
         sudo unzip -o $PROTOC_ZIP -d /usr/local 'include/*'
         rm -f $PROTOC_ZIP
         go install google.golang.org/protobuf/cmd/protoc-gen-go
+        sudo apt install protobuf-compiler
     - name: Make iris
       id: gateway_iris
       if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
