@@ -400,7 +400,7 @@ jobs:
   create-pr-gateway_iris:
      name: create PR gateway_iris
      if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
-     needs: [build_openweaver_linux, build_gateway_iris_cosmos]
+     needs: [build_openweaver_linux, build_gateway_iris]
      strategy:
       matrix:
         include:
