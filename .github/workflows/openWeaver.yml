@@ -42,6 +42,10 @@ on:
      description: 'description for new version'
      required: false
      default: 'automated'
+    runner-version:
+     description: 'runner version for the project you are building'
+     required: true
+     default: 'runner01'
 jobs:
   echo_input:
     name: display input params
@@ -296,7 +300,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "${{github.event.inputs.version-description}}" beacon "https://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon-checksum}}"
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" beacon "https://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
@@ -327,7 +331,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/relay_eth/releases.json" ${{github.event.inputs.relay_eth-version}} "${{github.event.inputs.version-description}}" relay "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_eth-checksum}}" geth "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64" "${{needs.build_abci-geth.outputs.geth-checksum}}"
+         python script.py "projects/relay_eth/releases.json" ${{github.event.inputs.relay_eth-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_eth-checksum}}" geth "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64" "${{needs.build_abci-geth.outputs.geth-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
@@ -358,7 +362,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_eth/releases.json" ${{github.event.inputs.gateway_eth-version}} "${{github.event.inputs.version-description}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_eth-checksum}}"
+         python script.py "projects/gateway_eth/releases.json" ${{github.event.inputs.gateway_eth-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_eth-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
@@ -389,7 +393,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_near/releases.json" ${{github.event.inputs.gateway_near-version}} "${{github.event.inputs.version-description}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_near/${{github.event.inputs.gateway_near-version}}/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_near-checksum}}"
+         python script.py "projects/gateway_near/releases.json" ${{github.event.inputs.gateway_near-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_near/${{github.event.inputs.gateway_near-version}}/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_near-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
@@ -420,7 +424,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_iris/releases.json" ${{github.event.inputs.gateway_iris-version}} "${{github.event.inputs.version-description}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_iris-checksum}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_iris.outputs.gateway_iris-checksum}}"
+         python script.py "projects/gateway_iris/releases.json" ${{github.event.inputs.gateway_iris-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_iris-checksum}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_iris.outputs.gateway_iris-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
@@ -450,7 +454,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_dot/releases.json" ${{github.event.inputs.gateway_dot-version}} "${{github.event.inputs.version-description}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_dot.outputs.gateway_dot-checksum}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_dot-checksum}}"
+         python script.py "projects/gateway_dot/releases.json" ${{github.event.inputs.gateway_dot-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_dot.outputs.gateway_dot-checksum}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_dot-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
