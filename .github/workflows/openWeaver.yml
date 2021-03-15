@@ -230,7 +230,7 @@ jobs:
         echo "$PATH"
         sudo make iris
         echo "::set-output name=checksum::$(md5sum build/iris_gateway | awk '{print $1;}')"
-        aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-linux_amd64
       env: 
         TENDERMINTCONNECTORBUILDVERSIONSTRING: ${{steps.semver_parser-iris.outputs.major}}.${{steps.semver_parser-iris.outputs.minor}}.${{steps.semver_parser-iris.outputs.patch}}
 
