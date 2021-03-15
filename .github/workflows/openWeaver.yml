@@ -57,7 +57,7 @@ jobs:
     - name: echo
       run: |
         echo openweaver-branch ${{github.event.inputs.openweaver-branch}}
-        echo openweaver-branch ${{github.event.inputs.tendermint-connector-branch}}
+        echo tendermint-connector-branch ${{github.event.inputs.tendermint-connector-branch}}
         echo beacon-version ${{github.event.inputs.beacon-version}}
         echo relay_eth-version ${{github.event.inputs.relay_eth-version}}
         echo gateway_eth-version ${{github.event.inputs.gateway_eth-version}}
