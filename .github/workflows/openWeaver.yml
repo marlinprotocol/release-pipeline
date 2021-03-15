@@ -193,7 +193,7 @@ jobs:
        aws s3 cp build/bin/geth s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64
   
   build_gateway_iris:
-    if: ${{github.event.inputs.gateway_cosmos-version != 'X.Y.Z-beta.U'}}
+    if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
     name: Buid gateway_iris
     strategy:
       matrix:
