@@ -420,7 +420,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_iris/releases.json" ${{github.event.inputs.gateway_iris-version}} "${{github.event.inputs.version-description}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_iris-checksum}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_iris_cosmos.outputs.gateway_iris-checksum}}"
+         python script.py "projects/gateway_iris/releases.json" ${{github.event.inputs.gateway_iris-version}} "${{github.event.inputs.version-description}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_iris-checksum}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_iris.outputs.gateway_iris-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
