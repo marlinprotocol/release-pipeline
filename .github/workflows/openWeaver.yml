@@ -228,6 +228,7 @@ jobs:
       if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "$PATH"
+        echo "$TENDERMINTCONNECTORBUILDVERSIONSTRING"
         sudo make iris
         echo "::set-output name=checksum::$(md5sum build/iris_gateway | awk '{print $1;}')"
         aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-linux_amd64
