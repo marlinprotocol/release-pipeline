@@ -77,8 +77,8 @@ jobs:
           GOARCH: amd64
     runs-on: ${{ matrix.os }}
     env: 
-      CC: /usr/bin/clang
-      CXX: /usr/bin/clang++
+      CC: /usr/bin/clang-10
+      CXX: /usr/bin/clang++-10
     outputs:
       beacon-checksum: ${{steps.beacon.outputs.checksum}}
       relay_eth-checksum: ${{steps.relay_eth.outputs.checksum}}
@@ -95,8 +95,9 @@ jobs:
         submodules: recursive
     - name: set c++ version
       run: |
+        sudo apt-get install clang-10
         echo "$(gcc --version)"
-        echo "$(clang --version)"
+        echo "$(clang-10 --version)"
     - name: install doxygen
       run: sudo apt-get install doxygen
     - name: install graphviz dot
