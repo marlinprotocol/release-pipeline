@@ -95,6 +95,8 @@ jobs:
         submodules: recursive
     - name: set c++ version
       run: |
+        sudo apt-get update
+        sudo apt-get upgrade
         sudo apt-get install clang-10
         echo "$(gcc --version)"
         echo "$(clang-10 --version)"
