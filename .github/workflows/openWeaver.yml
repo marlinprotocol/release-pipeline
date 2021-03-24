@@ -6,10 +6,6 @@ on:
      description: 'openweaver branch'
      required: false
      default: 'master'
-    tendermint-connector-branch:
-     description: 'tendermint connector branch'
-     required: false
-     default: 'main'
     beacon-version:
      description: 'beacon binary version'
      required: false
@@ -61,7 +57,6 @@ jobs:
     - name: echo
       run: |
         echo openweaver-branch ${{github.event.inputs.openweaver-branch}}
-        echo tendermint-connector-branch ${{github.event.inputs.tendermint-connector-branch}}
         echo beacon-version ${{github.event.inputs.beacon-version}}
         echo relay_eth-version ${{github.event.inputs.relay_eth-version}}
         echo gateway_eth-version ${{github.event.inputs.gateway_eth-version}}
@@ -211,7 +206,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: ${{github.event.inputs.tendermint-connector-branch}}
+        ref: main
         repository: supragya/TendermintConnector
         submodules: recursive
     - uses: actions/setup-go@v2
