@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-18.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -76,7 +76,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-18.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -171,7 +171,7 @@ jobs:
     name: Build abci-geth
     strategy:
       matrix:
-        os: ['ubuntu-20.04']
+        os: ['ubuntu-18.04']
         build_type: [Release]
     runs-on: ${{ matrix.os }}
     outputs:
@@ -201,7 +201,7 @@ jobs:
     name: Buid gateway_iris
     strategy:
       matrix:
-        os: ['ubuntu-20.04']
+        os: ['ubuntu-18.04']
         build_type: [Release]
     runs-on: ${{ matrix.os }}
     env: 
