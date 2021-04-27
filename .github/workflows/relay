@@ -1,0 +1,237 @@
+name: Build Relay
+on:
+  workflow_dispatch:
+   inputs:
+    openweaver-branch:
+     description: 'openweaver branch'
+     required: false
+     default: 'master'
+    relay_iris-version:
+     description: 'relay_iris binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    relay_cosmos-version:
+     description: 'relay_cosmos binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    relay_eth-version:
+     description: 'relay_eth binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    version-description:
+     description: 'description for new version'
+     required: false
+     default: 'automated'
+    runner-version:
+     description: 'runner version for the project you are building'
+     required: true
+     default: 'runner01'
+jobs:
+  echo_input:
+    name: display input params
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: echo
+      run: |
+        echo relay_eth-version ${{github.event.inputs.relay_eth-version}}
+        echo relay_iris-version ${{github.event.inputs.relay_iris-version}}
+        echo relay_cosmos-version ${{github.event.inputs.relay_cosmos-version}}
+        echo version-description ${{github.event.inputs.version-description}}
+        echo runner-version ${{github.event.inputs.runner-version}}
+        
+  build_openweaver_linux:
+    name: Build openWeaver linux
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    env: 
+      CC: /usr/bin/clang-10
+      CXX: /usr/bin/clang++-10
+    outputs:
+      relay_eth-checksum: ${{steps.relay_eth.outputs.checksum}}
+      relay_iris-checksum: ${{steps.relay_iris.outputs.checksum}}
+      relay_cosmos-checksum: ${{steps.relay_cosmos.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.inputs.openweaver-branch}}
+        repository: marlinprotocol/OpenWeaver
+        submodules: recursive
+    - name: set c++ version
+      run: |
+        sudo apt-get update
+        sudo apt-get upgrade
+        sudo apt-get install clang-10
+        echo "$(gcc --version)"
+        echo "$(clang-10 --version)"
+    - name: install doxygen
+      run: sudo apt-get install doxygen
+    - name: install graphviz dot
+      run: sudo apt install graphviz
+    - name: Build folder
+      run: mkdir build
+    - name: CMake
+      run: cd build && cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Make relay_eth
+      id: relay_eth
+      if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 eth_relay
+        echo "::set-output name=checksum::$(md5sum relay/eth_relay | awk '{print $1;}')"
+        aws s3 cp relay/eth_relay s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make relay_iris
+      id: relay_iris
+      if: ${{github.event.inputs.relay_iris-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 relay_iris
+        echo "::set-output name=checksum::$(md5sum relay/iris_relay | awk '{print $1;}')"
+        aws s3 cp relay/iris_relay s3://beta.artifacts.marlin.pro/projects/relay_iris/${{github.event.inputs.relay_iris-version}}/relay_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make relay_cosmos
+      id: relay_cosmos
+      if: ${{github.event.inputs.relay_cosmos-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 relay_cosmos
+        echo "::set-output name=checksum::$(md5sum relay/cosmos_relay | awk '{print $1;}')"
+        aws s3 cp relay/cosmos_relay s3://beta.artifacts.marlin.pro/projects/relay_cosmos/${{github.event.inputs.relay_cosmos-version}}/relay_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}
+
+  build_abci-geth:
+    if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
+    name: Build abci-geth
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      geth-checksum: ${{steps.geth.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        repository: marlinprotocol/abci-geth
+        submodules: recursive
+    - name: Make
+      run: make geth
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Upload
+      id: geth
+      run: |
+       echo "::set-output name=checksum::$(md5sum build/bin/geth | awk '{print $1;}')"
+       aws s3 cp build/bin/geth s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64
+  
+  create-pr-relay_eth:
+     name: create PR relay_eth
+     if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux, build_abci-geth]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/relay_eth/releases.json" ${{github.event.inputs.relay_eth-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_eth-checksum}}" geth "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64" "${{needs.build_abci-geth.outputs.geth-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-relay_eth-${{github.event.inputs.relay_eth-version}}
+          delete-branch: true
+          title: 'Update Build'
+          
+  create-pr-relay_iris:
+     name: create PR relay_iris
+     if: ${{github.event.inputs.relay_iris-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/relay_iris/releases.json" ${{github.event.inputs.relay_iris-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_iris/${{github.event.inputs.relay_iris-version}}/relay_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_iris-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-relay_iris-${{github.event.inputs.relay_iris-version}}
+          delete-branch: true
+          title: 'Update Build'
+          
+   create-pr-relay_cosmos:
+     name: create PR relay_cosmos
+     if: ${{github.event.inputs.relay_cosmos-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/relay_cosmos/releases.json" ${{github.event.inputs.relay_cosmos-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_cosmos/${{github.event.inputs.relay_cosmos-version}}/relay_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_cosmos-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-relay_iris-${{github.event.inputs.relay_cosmos-version}}
+          delete-branch: true
+          title: 'Update Build'
+          
