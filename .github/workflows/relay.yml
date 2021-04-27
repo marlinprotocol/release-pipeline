@@ -204,7 +204,7 @@ jobs:
           delete-branch: true
           title: 'Update Build'
           
-   create-pr-relay_cosmos:
+  create-pr-relay_cosmos:
      name: create PR relay_cosmos
      if: ${{github.event.inputs.relay_cosmos-version != 'X.Y.Z-beta.U'}}
      needs: [build_openweaver_linux]
