@@ -101,14 +101,14 @@ jobs:
       id: relay_iris
       if: ${{github.event.inputs.relay_iris-version != 'X.Y.Z-beta.U'}}
       run: |
-        cd build && make -j4 relay_iris
+        cd build && make -j4 iris_relay
         echo "::set-output name=checksum::$(md5sum relay/iris_relay | awk '{print $1;}')"
         aws s3 cp relay/iris_relay s3://beta.artifacts.marlin.pro/projects/relay_iris/${{github.event.inputs.relay_iris-version}}/relay_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: Make relay_cosmos
       id: relay_cosmos
       if: ${{github.event.inputs.relay_cosmos-version != 'X.Y.Z-beta.U'}}
       run: |
-        cd build && make -j4 relay_cosmos
+        cd build && make -j4 cosmos_relay
         echo "::set-output name=checksum::$(md5sum relay/cosmos_relay | awk '{print $1;}')"
         aws s3 cp relay/cosmos_relay s3://beta.artifacts.marlin.pro/projects/relay_cosmos/${{github.event.inputs.relay_cosmos-version}}/relay_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}
 
