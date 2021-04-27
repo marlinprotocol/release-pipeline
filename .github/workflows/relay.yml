@@ -231,7 +231,7 @@ jobs:
        uses: peter-evans/create-pull-request@v3
        with:
           token: ${{ secrets.PAT }}
-          branch: auto-relay_iris-${{github.event.inputs.relay_cosmos-version}}
+          branch: auto-relay_cosmos-${{github.event.inputs.relay_cosmos-version}}
           delete-branch: true
           title: 'Update Build'
           
