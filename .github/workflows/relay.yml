@@ -68,6 +68,7 @@ jobs:
       relay_eth-checksum: ${{steps.relay_eth.outputs.checksum}}
       relay_iris-checksum: ${{steps.relay_iris.outputs.checksum}}
       relay_cosmos-checksum: ${{steps.relay_cosmos.outputs.checksum}}
+      relay_dot-checksum: ${{steps.relay_dot.outputs.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
