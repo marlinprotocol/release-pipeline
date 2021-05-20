@@ -18,6 +18,10 @@ on:
      description: 'relay_eth binary version'
      required: false
      default: 'X.Y.Z-beta.U'
+    relay_dot-version:
+     description: 'relay_dot binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
     version-description:
      description: 'description for new version'
      required: false
@@ -43,6 +47,7 @@ jobs:
         echo relay_eth-version ${{github.event.inputs.relay_eth-version}}
         echo relay_iris-version ${{github.event.inputs.relay_iris-version}}
         echo relay_cosmos-version ${{github.event.inputs.relay_cosmos-version}}
+        echo relay_dot-version ${{github.event.inputs.relay_dot-version}}
         echo version-description ${{github.event.inputs.version-description}}
         echo runner-version ${{github.event.inputs.runner-version}}
         
@@ -97,6 +102,13 @@ jobs:
         cd build && make -j4 eth_relay
         echo "::set-output name=checksum::$(md5sum relay/eth_relay | awk '{print $1;}')"
         aws s3 cp relay/eth_relay s3://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make relay_dot
+      id: relay_dot
+      if: ${{github.event.inputs.relay_dot-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 dot_relay
+        echo "::set-output name=checksum::$(md5sum relay/dot_relay | awk '{print $1;}')"
+        aws s3 cp relay/dot_relay s3://beta.artifacts.marlin.pro/projects/relay_dot/${{github.event.inputs.relay_dot-version}}/relay_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: Make relay_iris
       id: relay_iris
       if: ${{github.event.inputs.relay_iris-version != 'X.Y.Z-beta.U'}}
