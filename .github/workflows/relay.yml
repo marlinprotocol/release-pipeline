@@ -185,6 +185,37 @@ jobs:
           delete-branch: true
           title: 'Update Build'
           
+  create-pr-relay_dot:
+     name: create PR relay_dot
+     if: ${{github.event.inputs.relay_dot-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/relay_dot/releases.json" ${{github.event.inputs.relay_dot-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_dot/${{github.event.inputs.relay_dot-version}}/relay_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_dot-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-relay_eth-${{github.event.inputs.relay_dot-version}}
+          delete-branch: true
+          title: 'Update Build'          
+          
   create-pr-relay_iris:
      name: create PR relay_iris
      if: ${{github.event.inputs.relay_iris-version != 'X.Y.Z-beta.U'}}
