@@ -158,7 +158,7 @@ jobs:
   create-pr-relay_eth:
      name: create PR relay_eth
      if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
-     needs: [build_openweaver_linux, build_abci-geth]
+     needs: [build_openweaver_linux]
      strategy:
       matrix:
         include:
@@ -177,7 +177,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/relay_eth/releases.json" ${{github.event.inputs.relay_eth-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_eth-checksum}}" geth "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/geth-linux_amd64" "${{needs.build_abci-geth.outputs.geth-checksum}}"
+         python script.py "projects/relay_eth/releases.json" ${{github.event.inputs.relay_eth-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_eth/${{github.event.inputs.relay_eth-version}}/relay_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_eth-checksum}}"}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
