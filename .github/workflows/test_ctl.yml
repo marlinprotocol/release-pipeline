@@ -41,10 +41,7 @@ jobs:
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    env: 
-      CC: /usr/bin/clang-10
-      CXX: /usr/bin/clang++-10
+    runs-on: ${{ matrix.os }} 
     outputs:
       marlinctl-checksum: ${{steps.marlinctl.outputs.checksum}}
     steps:
