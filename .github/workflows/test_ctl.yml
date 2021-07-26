@@ -67,7 +67,7 @@ jobs:
       run: |
         sh mk.sh ${{github.event.inputs.marlinctl-version}}
         echo "::set-output name=checksum::$(md5sum build/marlinctl | awk '{print $1;}')"
-        aws s3 cp build/marlinctl s3://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version}}/marlinctl-${{github.event.inputs.marlinctl-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
+        aws s3 cp build/marlinctl s3://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version}}/marlinctl-${{matrix.GOOS}}-${{matrix.GOARCH}}
      
   create-pr-marlinctl:
      name: create PR marlinctl
@@ -91,7 +91,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/marlinctl/releases.json" ${{github.event.inputs.marlinctl-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" marlinctl "https://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version}}/marlinctl-${{github.event.inputs.marlinctl-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}" "${{needs.build_marlinctl.outputs.marlinctl-checksum}}"
+         python script.py "projects/marlinctl/releases.json" ${{github.event.inputs.marlinctl-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" marlinctl "https://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version}}/marlinctl-${{matrix.GOOS}}-${{matrix.GOARCH}}" "${{needs.build_marlinctl.outputs.marlinctl-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
