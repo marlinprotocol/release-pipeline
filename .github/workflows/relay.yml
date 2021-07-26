@@ -126,7 +126,7 @@ jobs:
         aws s3 cp relay/cosmos_relay s3://beta.artifacts.marlin.pro/projects/relay_cosmos/${{github.event.inputs.relay_cosmos-version}}/relay_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}
 
   build_abci-geth:
-    if: ${{github.event.inputs.relay_eth-version != 'X.Y.Z-beta.U'}}
+    if: ${{github.event.inputs.relay_eth-version == 'DISABLED'}}
     name: Build abci-geth
     strategy:
       matrix:
