@@ -14,8 +14,8 @@ on:
      description: 'gateway_eth binary version'
      required: false
      default: 'X.Y.Z-beta.U'
-    gateway_maticbor-version:
-     description: 'gateway_maticbor binary version'
+    gateway_polygonbor-version:
+     description: 'gateway_polygonbor binary version'
      required: false
      default: 'X.Y.Z-beta.U'
     gateway_near-version:
@@ -58,7 +58,7 @@ jobs:
       run: |
         echo openweaver-branch ${{github.event.inputs.openweaver-branch}}
         echo beacon-version ${{github.event.inputs.beacon-version}}
-        echo gateway_maticbor-version ${{github.event.inputs.gateway_maticbor-version}}
+        echo gateway_polygonbor-version ${{github.event.inputs.gateway_polygonbor-version}}
         echo gateway_eth-version ${{github.event.inputs.gateway_eth-version}}
         echo gateway_near-version ${{github.event.inputs.gateway_near-version}}
         echo gateway_iris-version ${{github.event.inputs.gateway_iris-version}}
@@ -81,7 +81,7 @@ jobs:
       CXX: /usr/bin/clang++-10
     outputs:
       beacon-checksum: ${{steps.beacon.outputs.checksum}}
-      gateway_maticbor-checksum: ${{steps.gateway_maticbor.outputs.checksum}}
+      gateway_polygonbor-checksum: ${{steps.gateway_polygonbor.outputs.checksum}}
       gateway_eth-checksum: ${{steps.gateway_eth.outputs.checksum}}
       gateway_near-checksum: ${{steps.gateway_near.outputs.checksum}}
       gateway_iris-checksum: ${{steps.gateway_iris.outputs.checksum}}
@@ -128,13 +128,13 @@ jobs:
         cd build && make -j4 onramp-eth
         echo "::set-output name=checksum::$(md5sum integrations/eth/onramp_eth | awk '{print $1;}')"
         aws s3 cp integrations/eth/onramp_eth s3://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
-    - name: Make gateway_maticbor
-      id: gateway_maticbor
-      if: ${{github.event.inputs.gateway_maticbor-version != 'X.Y.Z-beta.U'}}
+    - name: Make gateway_polygonbor
+      id: gateway_polygonbor
+      if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
       run: |
         cd build && make -j4 onramp-matic
         echo "::set-output name=checksum::$(md5sum integrations/matic/onramp_matic | awk '{print $1;}')"
-        aws s3 cp integrations/matic/onramp_matic s3://beta.artifacts.marlin.pro/projects/gateway_maticbor/${{github.event.inputs.gateway_maticbor-version}}/gateway_maticbor-${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp integrations/matic/onramp_matic s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: Make gateway_near
       id: gateway_near
       if: ${{github.event.inputs.gateway_near-version != 'X.Y.Z-beta.U'}}
@@ -247,7 +247,7 @@ jobs:
        aws s3 cp target/release/gateway_dot s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-linux_amd64
 
   build_abci-bor:
-    if: ${{github.event.inputs.gateway_maticbor-version != 'X.Y.Z-beta.U'}}
+    if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
     name: Build abci-bor
     strategy:
       matrix:
@@ -274,7 +274,7 @@ jobs:
       id: bor
       run: |
        echo "::set-output name=checksum::$(md5sum build/bin/bor | awk '{print $1;}')"
-       aws s3 cp build/bin/bor s3://beta.artifacts.marlin.pro/projects/gateway_maticbor/${{github.event.inputs.gateway_maticbor-version}}/bor-linux_amd64
+       aws s3 cp build/bin/bor s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/bor-linux_amd64
   
   create-pr-beacon:
      name: create PR beacon
@@ -307,9 +307,9 @@ jobs:
           delete-branch: true
           title: 'Update Build'
           
-  create-pr-gateway_maticbor:
-     name: create PR gateway_maticbor
-     if: ${{github.event.inputs.gateway_maticbor-version != 'X.Y.Z-beta.U'}}
+  create-pr-gateway_polygonbor:
+     name: create PR gateway_polygonbor
+     if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
      needs: [build_openweaver_linux,build_abci-bor]
      strategy:
       matrix:
@@ -329,12 +329,12 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_maticbor/releases.json" ${{github.event.inputs.gateway_maticbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_maticbor/${{github.event.inputs.gateway_maticbor-version}}/gateway_maticbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_maticbor-checksum}}" bor "https://beta.artifacts.marlin.pro/projects/gateway_maticbor/${{github.event.inputs.gateway_maticbor-version}}/bor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_abci-bor.outputs.bor-checksum}}"
+         python script.py "projects/gateway_polygonbor/releases.json" ${{github.event.inputs.gateway_polygonbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_polygonbor-checksum}}" bor "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/bor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_abci-bor.outputs.bor-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
           token: ${{ secrets.PAT }}
-          branch: auto-gateway_maticbor-${{github.event.inputs.gateway_maticbor-version}}
+          branch: auto-gateway_polygonbor-${{github.event.inputs.gateway_polygonbor-version}}
           delete-branch: true
           title: 'Update Build'
           
