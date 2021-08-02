@@ -247,7 +247,7 @@ jobs:
        aws s3 cp target/release/gateway_dot s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-linux_amd64
 
   build_abci-bor:
-    if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
+    if: ${{github.event.inputs.gateway_polygonbor-version == 'DISABLED'}}
     name: Build abci-bor
     strategy:
       matrix:
@@ -310,7 +310,7 @@ jobs:
   create-pr-gateway_polygonbor:
      name: create PR gateway_polygonbor
      if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
-     needs: [build_openweaver_linux,build_abci-bor]
+     needs: [build_openweaver_linux]
      strategy:
       matrix:
         include:
@@ -329,7 +329,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_polygonbor/releases.json" ${{github.event.inputs.gateway_polygonbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_polygonbor-checksum}}" bor "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/bor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_abci-bor.outputs.bor-checksum}}"
+         python script.py "projects/gateway_polygonbor/releases.json" ${{github.event.inputs.gateway_polygonbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_polygonbor-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
