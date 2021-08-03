@@ -10,6 +10,10 @@ on:
      description: 'relay_iris binary version'
      required: false
      default: 'X.Y.Z-beta.U'
+    relay_polygon-version:
+     description: 'relay_polygon binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
     relay_cosmos-version:
      description: 'relay_cosmos binary version'
      required: false
@@ -46,6 +50,7 @@ jobs:
       run: |
         echo relay_eth-version ${{github.event.inputs.relay_eth-version}}
         echo relay_iris-version ${{github.event.inputs.relay_iris-version}}
+        echo relay_polygon-version ${{github.event.inputs.relay_polygon-version}}
         echo relay_cosmos-version ${{github.event.inputs.relay_cosmos-version}}
         echo relay_dot-version ${{github.event.inputs.relay_dot-version}}
         echo version-description ${{github.event.inputs.version-description}}
@@ -69,6 +74,7 @@ jobs:
       relay_iris-checksum: ${{steps.relay_iris.outputs.checksum}}
       relay_cosmos-checksum: ${{steps.relay_cosmos.outputs.checksum}}
       relay_dot-checksum: ${{steps.relay_dot.outputs.checksum}}
+      relay_polygon-checksum: ${{steps.relay_polygon.outputs.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -117,6 +123,13 @@ jobs:
         cd build && make -j4 iris_relay
         echo "::set-output name=checksum::$(md5sum relay/iris_relay | awk '{print $1;}')"
         aws s3 cp relay/iris_relay s3://beta.artifacts.marlin.pro/projects/relay_iris/${{github.event.inputs.relay_iris-version}}/relay_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make relay_polygon
+      id: relay_polygon
+      if: ${{github.event.inputs.relay_polygon-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 maticbor_relay
+        echo "::set-output name=checksum::$(md5sum relay/maticbor_relay | awk '{print $1;}')"
+        aws s3 cp relay/maticbor_relay s3://beta.artifacts.marlin.pro/projects/relay_polygon/${{github.event.inputs.relay_polygon-version}}/relay_polygon-${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: Make relay_cosmos
       id: relay_cosmos
       if: ${{github.event.inputs.relay_cosmos-version != 'X.Y.Z-beta.U'}}
@@ -245,6 +258,37 @@ jobs:
        with:
           token: ${{ secrets.PAT }}
           branch: auto-relay_iris-${{github.event.inputs.relay_iris-version}}
+          delete-branch: true
+          title: 'Update Build'
+  
+  create-pr-relay_polygon:
+     name: create PR relay_polygon
+     if: ${{github.event.inputs.relay_polygon-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/relay_polygon/releases.json" ${{github.event.inputs.relay_polygon-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" relay "https://beta.artifacts.marlin.pro/projects/relay_polygon/${{github.event.inputs.relay_polygon-version}}/relay_polygon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.relay_polygon-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-relay_polygon-${{github.event.inputs.relay_polygon-version}}
           delete-branch: true
           title: 'Update Build'
           
