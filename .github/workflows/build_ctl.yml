@@ -6,10 +6,14 @@ on:
      description: 'marlinctl branch'
      required: false
      default: 'master'
-    marlinctl-version:
-     description: 'marlinctl binary version'
-     required: false
-     default: 'X.Y.Z-beta.U'
+    marlinctl-version-main:
+     description: 'main project version'
+     required: true
+     default: 'X.Y.Z'
+    marlinctl-version-beta:
+     description: 'beta version'
+     required: true
+     default: 'beta.U'
     version-description:
      description: 'description for new version'
      required: false
@@ -29,7 +33,7 @@ jobs:
     - name: echo
       run: |
         echo marlinctl-branch ${{github.event.inputs.marlinctl-branch}}
-        echo marlinctl-version ${{github.event.inputs.marlinctl-version}}
+        echo marlinctl-version ${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}
         echo version-description ${{github.event.inputs.version-description}}
         
   build_marlinctl:
@@ -43,7 +47,8 @@ jobs:
           GOARCH: amd64
     runs-on: ${{ matrix.os }} 
     outputs:
-      marlinctl-checksum: ${{steps.marlinctl.outputs.checksum}}
+      marlinctl-beta-checksum: ${{steps.marlinctl_beta.outputs.checksum}}
+      marlinctl-release-checksum: ${{steps.marlinctl_release.outputs.checksum}}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -62,16 +67,23 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-southeast-1
     - name: Make marlinctl
-      id: marlinctl
-      if: ${{github.event.inputs.marlinctl-version != 'X.Y.Z-beta.U'}}
+      id: marlinctl_beta
+      if: ${{github.event.inputs.marlinctl-version-main != 'X.Y.Z'}} && ${{github.event.inputs.marlinctl-version-beta != 'beta.U'}}
       run: |
-        sh mk.sh ${{github.event.inputs.marlinctl-version}}
+        sh mk.sh ${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}
         echo "::set-output name=checksum::$(md5sum build/marlinctl | awk '{print $1;}')"
-        aws s3 cp build/marlinctl s3://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp build/marlinctl s3://beta.artifacts.marlin.pro/projects/marlinctl_beta/${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make marlinctl_release
+      id: marlinctl_release
+      if: ${{github.event.inputs.marlinctl-version-main != 'X.Y.Z'}} && ${{github.event.inputs.marlinctl-version-beta != 'beta.U'}}
+      run: |
+        sh mk.sh ${{github.event.inputs.marlinctl-version-main}}
+        echo "::set-output name=checksum::$(md5sum build/marlinctl | awk '{print $1;}')"
+        aws s3 cp build/marlinctl s3://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}
      
   create-pr-marlinctl:
      name: create PR marlinctl
-     if: ${{github.event.inputs.marlinctl-version != 'X.Y.Z-beta.U'}}
+     if: ${{github.event.inputs.marlinctl-version-main != 'X.Y.Z'}} && ${{github.event.inputs.marlinctl-version-beta != 'beta.U'}}
      needs: [build_marlinctl]
      strategy:
       matrix:
@@ -91,12 +103,12 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/marlinctl/releases.json" ${{github.event.inputs.marlinctl-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" marlinctl "https://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_marlinctl.outputs.marlinctl-checksum}}"
+         python script.py "projects/marlinctl/releases.json" ${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" marlinctl "https://beta.artifacts.marlin.pro/projects/marlinctl_beta/${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_marlinctl.outputs.marlinctl-beta-checksum}}" marlinctl "https://beta.artifacts.marlin.pro/projects/marlinctl/${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_marlinctl.outputs.marlinctl-release-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
           token: ${{ secrets.PAT }}
-          branch: auto-marlinctl-${{github.event.inputs.marlinctl-version}}
+          branch: auto-marlinctl-${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}
           delete-branch: true
           title: 'Update Build'
           
