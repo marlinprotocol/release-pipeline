@@ -32,7 +32,7 @@ jobs:
         echo abci-bor-version ${{github.event.inputs.abci-bor-version}}
 
   build_abci-bor:
-    if: ${{github.event.inputs.abci-bor-version == 'X.Y.Z-beta.U'}}
+    if: ${{github.event.inputs.abci-bor-version != 'X.Y.Z-beta.U'}}
     name: Build abci-bor
     strategy:
       matrix:
