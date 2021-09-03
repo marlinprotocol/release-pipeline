@@ -275,6 +275,37 @@ jobs:
       run: |
        echo "::set-output name=checksum::$(md5sum build/bin/bor | awk '{print $1;}')"
        aws s3 cp build/bin/bor s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/bor-linux_amd64
+       
+  build_proxy-bor:
+    if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
+    name: Build proxy-bor
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      proxy-bor-checksum: ${{steps.proxy.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        repository: marlinprotocol/mev-proxy
+        submodules: recursive
+    - name: Make
+      run: make proxy
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Upload
+      id: proxy
+      run: |
+       echo "::set-output name=checksum::$(md5sum build/mev-proxy | awk '{print $1;}')"
+       aws s3 cp build/mev-proxy s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/mevproxy-linux_amd64
+
   
   create-pr-beacon:
      name: create PR beacon
@@ -310,7 +341,7 @@ jobs:
   create-pr-gateway_polygonbor:
      name: create PR gateway_polygonbor
      if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
-     needs: [build_openweaver_linux]
+     needs: [build_openweaver_linux, build_proxy-bor]
      strategy:
       matrix:
         include:
@@ -329,7 +360,7 @@ jobs:
      - name: edit
        run: |
          pip install semantic_version
-         python script.py "projects/gateway_polygonbor/releases.json" ${{github.event.inputs.gateway_polygonbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_polygonbor-checksum}}"
+         python script.py "projects/gateway_polygonbor/releases.json" ${{github.event.inputs.gateway_polygonbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_polygonbor-checksum}}" mevproxy "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/mevproxy-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.proxy-bor-checksum}}"
      - name: pr
        uses: peter-evans/create-pull-request@v3
        with:
