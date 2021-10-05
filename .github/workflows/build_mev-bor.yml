@@ -80,13 +80,12 @@ jobs:
         ref: ${{github.event.inputs.mev-bor-branch}}
         repository: marlinprotocol/mev-bor
         submodules: recursive
-    - uses: uraimo/run-on-arch-action@v2.1.1
-      name: Make
-      id: runcmd
-      with:
-        arch: aarch64
-        distro: ubuntu18.04
-        run: make bor
+    - name: install docker
+      run: |
+       curl -fsSL https://get.docker.com -o get-docker.sh
+       sudo sh get-docker.sh
+    - name: Make
+      run: make geth-linux-arm64
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -96,6 +95,6 @@ jobs:
     - name: Upload
       id: bor
       run: |
-       echo "::set-output name=checksum::$(md5sum build/bin/bor | awk '{print $1;}')"
-       aws s3 cp build/bin/bor s3://${{github.event.inputs.release-on}}.artifacts.marlin.pro/projects/mev-bor/${{github.event.inputs.mev-bor-version}}/bor-linux_arm64
+       echo "::set-output name=checksum::$(md5sum build/bin/geth | awk '{print $1;}')"
+       aws s3 cp build/bin/geth s3://${{github.event.inputs.release-on}}.artifacts.marlin.pro/projects/mev-bor/${{github.event.inputs.mev-bor-version}}/bor-linux_arm64
  
