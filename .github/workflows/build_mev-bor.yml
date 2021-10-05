@@ -84,7 +84,7 @@ jobs:
       name: Make
       id: runcmd
       with:
-        arch: armv64
+        arch: aarch64
         distro: ubuntu18.04
         run: make bor
     - name: Configure AWS credentials
