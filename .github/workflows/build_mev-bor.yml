@@ -50,6 +50,7 @@ jobs:
         ref: ${{github.event.inputs.mev-bor-branch}}
         repository: marlinprotocol/mev-bor
         submodules: recursive
+    - uses: actions/setup-go@v2
     - name: Make
       run: make bor
     - name: Configure AWS credentials
