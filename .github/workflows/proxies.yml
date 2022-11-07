@@ -1,0 +1,482 @@
+name: Build proxies
+on:
+  workflow_dispatch:
+   inputs:
+    iptv-version:
+     description: 'beacon binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    vtip-version:
+     description: 'gateway_eth binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    iptvt-version:
+     description: 'gateway_polygonbor binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    vtipt-version:
+     description: 'gateway_near binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
+    version-description:
+     description: 'description for new version'
+     required: false
+     default: 'automated'
+jobs:
+  echo_input:
+    name: display input params
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+        - os: 'ubuntu-18.04'
+
+          build_type: Release
+
+          GOOS: linux
+
+          GOARCH: amd64
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: echo
+      run: |
+        echo openweaver-branch ${{github.event.inputs.openweaver-branch}}
+        echo beacon-version ${{github.event.inputs.beacon-version}}
+        echo gateway_polygonbor-version ${{github.event.inputs.gateway_polygonbor-version}}
+        echo gateway_eth-version ${{github.event.inputs.gateway_eth-version}}
+        echo gateway_near-version ${{github.event.inputs.gateway_near-version}}
+        echo gateway_iris-version ${{github.event.inputs.gateway_iris-version}}
+        echo gateway_dot-version ${{github.event.inputs.gateway_dot-version}}
+        echo gateway_cosmos-version ${{github.event.inputs.gateway_cosmos-version}}
+        echo version-description ${{github.event.inputs.version-description}}
+        
+  build_openweaver_linux:
+    name: Build openWeaver linux
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    env: 
+      CC: /usr/bin/clang-10
+      CXX: /usr/bin/clang++-10
+    outputs:
+      beacon-checksum: ${{steps.beacon.outputs.checksum}}
+      gateway_polygonbor-checksum: ${{steps.gateway_polygonbor.outputs.checksum}}
+      gateway_eth-checksum: ${{steps.gateway_eth.outputs.checksum}}
+      gateway_near-checksum: ${{steps.gateway_near.outputs.checksum}}
+      gateway_iris-checksum: ${{steps.gateway_iris.outputs.checksum}}
+      gateway_dot-checksum: ${{steps.gateway_dot.outputs.checksum}}
+      gateway_cosmos-checksum: ${{steps.gateway_cosmos.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{github.event.inputs.openweaver-branch}}
+        repository: marlinprotocol/OpenWeaver
+        submodules: recursive
+    - name: set c++ version
+      run: |
+        sudo apt-get update
+        sudo apt-get upgrade
+        sudo apt-get install clang-10
+        echo "$(gcc --version)"
+        echo "$(clang-10 --version)"
+    - name: install doxygen
+      run: sudo apt-get install doxygen
+    - name: install graphviz dot
+      run: sudo apt install graphviz
+    - name: Build folder
+      run: mkdir build
+    - name: CMake
+      run: cd build && cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Make beacon
+      id: beacon
+      if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 beacon_all
+        echo "::set-output name=checksum::$(md5sum beacon/beacon | awk '{print $1;}')"
+        aws s3 cp beacon/beacon s3://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_eth
+      id: gateway_eth
+      if: ${{github.event.inputs.gateway_eth-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 onramp-eth
+        echo "::set-output name=checksum::$(md5sum integrations/eth/onramp_eth | awk '{print $1;}')"
+        aws s3 cp integrations/eth/onramp_eth s3://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_polygonbor
+      id: gateway_polygonbor
+      if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 onramp-matic
+        echo "::set-output name=checksum::$(md5sum integrations/matic/onramp_matic | awk '{print $1;}')"
+        aws s3 cp integrations/matic/onramp_matic s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_near
+      id: gateway_near
+      if: ${{github.event.inputs.gateway_near-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 near_gateway
+        echo "::set-output name=checksum::$(md5sum integrations/near/near_gateway | awk '{print $1;}')"
+        aws s3 cp integrations/near/near_gateway s3://beta.artifacts.marlin.pro/projects/gateway_near/${{github.event.inputs.gateway_near-version}}/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_iris
+      id: gateway_iris
+      if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 iris_bridge
+        echo "::set-output name=checksum::$(md5sum multicastsdk/iris_bridge | awk '{print $1;}')"
+        aws s3 cp multicastsdk/iris_bridge s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_dot
+      id: gateway_dot
+      if: ${{github.event.inputs.gateway_dot-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 dot_bridge
+        echo "::set-output name=checksum::$(md5sum multicastsdk/dot_bridge | awk '{print $1;}')"
+        aws s3 cp multicastsdk/dot_bridge s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: Make gateway_cosmos
+      id: gateway_cosmos
+      if: ${{github.event.inputs.gateway_cosmos-version != 'X.Y.Z-beta.U'}}
+      run: |
+        cd build && make -j4 cosmos_bridge
+        echo "::set-output name=checksum::$(md5sum multicastsdk/cosmos_bridge | awk '{print $1;}')"
+        aws s3 cp multicastsdk/cosmos_bridge s3://beta.artifacts.marlin.pro/projects/gateway_cosmos/${{github.event.inputs.gateway_cosmos-version}}/bridge_cosmos-${{matrix.GOOS}}_${{matrix.GOARCH}}
+  
+  build_gateway_iris:
+    if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
+    name: Buid gateway_iris
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    env: 
+      GO111MODULE: on
+    outputs:
+      gateway_iris-checksum: ${{steps.gateway_iris.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: main
+        repository: supragya/TendermintConnector
+        submodules: recursive
+    - uses: actions/setup-go@v2
+    - name: Parse semver string iris
+      id: semver_parser-iris
+      if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
+      uses: booxmedialtd/ws-action-parse-semver@v1
+      with:
+        input_string: ${{github.event.inputs.gateway_iris-version}}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Make iris
+      id: gateway_iris
+      if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
+      run: |
+        echo "$PATH"
+        echo "$TENDERMINTCONNECTORBUILDVERSIONSTRING"
+        sudo make iris
+        echo "::set-output name=checksum::$(md5sum build/iris_gateway | awk '{print $1;}')"
+        aws s3 cp build/iris_gateway s3://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-linux_amd64
+      env: 
+        TENDERMINTCONNECTORBUILDVERSIONSTRING: ${{steps.semver_parser-iris.outputs.major}}.${{steps.semver_parser-iris.outputs.minor}}.${{steps.semver_parser-iris.outputs.patch}}
+
+  build_gateway_dot:
+    if: ${{github.event.inputs.gateway_dot-version != 'X.Y.Z-beta.U'}}
+    name: Build gateway-dot
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      gateway_dot-checksum: ${{steps.gateway_dot.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        repository: marlinprotocol/polkadot-integration
+        submodules: recursive
+    - name: Install Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > temp
+        chmod 777 temp
+        ./temp -y
+        echo $(rustc --version)
+        rustup toolchain install 1.47.0
+        rustup override set 1.47.0
+        echo $(rustc --version)
+    - name: Build
+      run: cargo build --release --all-features
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Upload
+      id: gateway_dot
+      run: |
+       echo "::set-output name=checksum::$(md5sum target/release/gateway_dot | awk '{print $1;}')"
+       aws s3 cp target/release/gateway_dot s3://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-linux_amd64
+
+  build_abci-bor:
+    if: ${{github.event.inputs.gateway_polygonbor-version == 'DISABLED'}}
+    name: Build abci-bor
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      bor-checksum: ${{steps.bor.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+        repository: marlinprotocol/abci-bor
+        submodules: recursive
+    - name: Make
+      run: make bor
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Upload
+      id: bor
+      run: |
+       echo "::set-output name=checksum::$(md5sum build/bin/bor | awk '{print $1;}')"
+       aws s3 cp build/bin/bor s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/bor-linux_amd64
+       
+  build_proxy-bor:
+    if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
+    name: Build proxy-bor
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      proxy-bor-checksum: ${{steps.proxy.outputs.checksum}}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PAT }}
+        ref: master
+        repository: marlinprotocol/mev-proxy
+        submodules: recursive
+    - name: Make
+      run: make proxy
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: Upload
+      id: proxy
+      run: |
+       echo "::set-output name=checksum::$(md5sum build/mev-proxy | awk '{print $1;}')"
+       aws s3 cp build/mev-proxy s3://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/mevproxy-linux_amd64
+
+  
+  create-pr-beacon:
+     name: create PR beacon
+     if: ${{github.event.inputs.beacon-version != 'X.Y.Z-beta.U'}}
+     needs: build_openweaver_linux
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/beacon/releases.json" ${{github.event.inputs.beacon-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" beacon "https://beta.artifacts.marlin.pro/projects/beacon/${{github.event.inputs.beacon-version}}/beacon-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.beacon-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-beacon-${{github.event.inputs.beacon-version}}
+          delete-branch: true
+          title: 'Update Build'
+          
+  create-pr-gateway_polygonbor:
+     name: create PR gateway_polygonbor
+     if: ${{github.event.inputs.gateway_polygonbor-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux, build_proxy-bor]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/gateway_polygonbor/releases.json" ${{github.event.inputs.gateway_polygonbor-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/gateway_polygonbor-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_polygonbor-checksum}}" mevproxy "https://beta.artifacts.marlin.pro/projects/gateway_polygonbor/${{github.event.inputs.gateway_polygonbor-version}}/mevproxy-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_proxy-bor.outputs.proxy-bor-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-gateway_polygonbor-${{github.event.inputs.gateway_polygonbor-version}}
+          delete-branch: true
+          title: 'Update Build'
+          
+  create-pr-gateway_eth:
+     name: create PR gateway_eth
+     if: ${{github.event.inputs.gateway_eth-version != 'X.Y.Z-beta.U'}}
+     needs: build_openweaver_linux
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/gateway_eth/releases.json" ${{github.event.inputs.gateway_eth-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_eth/${{github.event.inputs.gateway_eth-version}}/gateway_eth-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_eth-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-gateway_eth-${{github.event.inputs.gateway_eth-version}}
+          delete-branch: true
+          title: 'Update Build'
+
+  create-pr-gateway_near:
+     name: create PR gateway_near
+     if: ${{github.event.inputs.gateway_near-version != 'X.Y.Z-beta.U'}}
+     needs: build_openweaver_linux
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/gateway_near/releases.json" ${{github.event.inputs.gateway_near-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_near/${{github.event.inputs.gateway_near-version}}/gateway_near-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_near-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-gateway_near-${{github.event.inputs.gateway_near-version}}
+          delete-branch: true
+          title: 'Update Build'
+  
+  create-pr-gateway_iris:
+     name: create PR gateway_iris
+     if: ${{github.event.inputs.gateway_iris-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux, build_gateway_iris]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/gateway_iris/releases.json" ${{github.event.inputs.gateway_iris-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/bridge_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_iris-checksum}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_iris/${{github.event.inputs.gateway_iris-version}}/gateway_iris-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_iris.outputs.gateway_iris-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-gateway_iris-${{github.event.inputs.gateway_iris-version}}
+          delete-branch: true
+          title: 'Update Build'
+  create-pr-gateway_dot:
+     name: create PR gateway_dot
+     if: ${{github.event.inputs.gateway_dot-version != 'X.Y.Z-beta.U'}}
+     needs: [build_openweaver_linux, build_gateway_dot]
+     strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-18.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+     runs-on: ${{ matrix.os }}
+     steps:
+     - uses: actions/checkout@v2
+       with:
+        token: ${{ secrets.PAT }}
+        ref: beta
+        repository: marlinprotocol/releases
+        submodules: recursive
+     - name: edit
+       run: |
+         pip install semantic_version
+         python script.py "projects/gateway_dot/releases.json" ${{github.event.inputs.gateway_dot-version}} "${{github.event.inputs.version-description}}" "${{github.event.inputs.runner-version}}" gateway "https://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/gateway_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_gateway_dot.outputs.gateway_dot-checksum}}" bridge "https://beta.artifacts.marlin.pro/projects/gateway_dot/${{github.event.inputs.gateway_dot-version}}/bridge_dot-${{matrix.GOOS}}_${{matrix.GOARCH}}" "${{needs.build_openweaver_linux.outputs.gateway_dot-checksum}}"
+     - name: pr
+       uses: peter-evans/create-pull-request@v3
+       with:
+          token: ${{ secrets.PAT }}
+          branch: auto-gateway_dot-${{github.event.inputs.gateway_dot-version}}
+          delete-branch: true
+          title: 'Update Build'
