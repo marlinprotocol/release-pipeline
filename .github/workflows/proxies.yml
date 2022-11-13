@@ -61,12 +61,10 @@ jobs:
       iptvt-checksum: ${{steps.iptvt.outputs.checksum}}
       vtipt-checksum: ${{steps.vtipt.outputs.checksum}}
     steps:
-    - uses: actions/checkout@v2
-      with:
-        repository: hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo.git
-        github-server-url: https://radicle.lsqtech.org/
+    - name: clone
+      run: git clone https://radicle.lsqtech.org/hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo.git proxy
     - name: build
-      run: cargo build --release
+      run: cd proxy && cargo build --release
 #     - name: Build folder
 #       run: mkdir build
 #     - name: CMake
