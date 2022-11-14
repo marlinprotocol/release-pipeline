@@ -64,7 +64,7 @@ jobs:
     - name: clone
       run: git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/cabbage/* https://radicle.lsqtech.org/hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo proxy
     - name: checkout
-      run: cd proxy && git checkout cabbage/master proxy
+      run: cd proxy && git checkout cabbage/master
     - name: build
       run: cd proxy && cargo build --release
 #     - name: Build folder
