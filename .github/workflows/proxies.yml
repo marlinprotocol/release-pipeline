@@ -42,8 +42,8 @@ jobs:
         echo vtipt-version ${{github.event.inputs.vtipt-version}}
         echo version-description ${{github.event.inputs.version-description}}
         
-  build_openweaver_linux:
-    name: Build openWeaver linux
+  build_proxies_linux:
+    name: Build proxies linux
     strategy:
       matrix:
         include:
@@ -62,7 +62,9 @@ jobs:
       vtipt-checksum: ${{steps.vtipt.outputs.checksum}}
     steps:
     - name: clone
-      run: git clone https://radicle.lsqtech.org/hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo.git proxy
+      run: git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/cabbage/* https://radicle.lsqtech.org/hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo proxy
+    - name: checkout
+      run: cd proxy && git checkout cabbage/master proxy
     - name: build
       run: cd proxy && cargo build --release
 #     - name: Build folder
