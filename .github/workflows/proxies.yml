@@ -71,8 +71,8 @@ jobs:
       id: iptv
       if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum proxy/targets/release/ip-to-vsock | awk '{print $1;}')"
-        aws s3 cp proxy/targets/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock | awk '{print $1;}')"
+        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
 #     - name: Make gateway_eth
 #       id: gateway_eth
 #       if: ${{github.event.inputs.gateway_eth-version != 'X.Y.Z-beta.U'}}
