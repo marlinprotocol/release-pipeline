@@ -78,60 +78,22 @@ jobs:
       if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock | awk '{print $1;}')"
-        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
-    - name: upload iptv
-
-      id: iptv
-
-      if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
-
+        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: upload vtip
+      id: vtip
+      if: ${{github.event.inputs.vtip-version != 'X.Y.Z-beta.U'}}
       run: |
-
-        echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock | awk '{print $1;}')"
-
-        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
-
-
-
-    - name: upload iptv
-
-      id: iptv
-
-      if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
-
+        echo "::set-output name=checksum::$(md5sum proxy/target/release/vsock-to-ip | awk '{print $1;}')"
+        aws s3 cp proxy/target/release/vsock-to-ip s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: upload iptvt
+      id: iptvt
+      if: ${{github.event.inputs.iptvt-version != 'X.Y.Z-beta.U'}}
       run: |
-
-        echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock | awk '{print $1;}')"
-
-        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
-
-
-
-    - name: upload iptv
-
-      id: iptv
-
-      if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
-
+        echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock-transparent | awk '{print $1;}')"
+        aws s3 cp proxy/target/release/ip-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: upload vtipt
+      id: vtipt
+      if: ${{github.event.inputs.vtipt-version != 'X.Y.Z-beta.U'}}
       run: |
-
-        echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock | awk '{print $1;}')"
-
-        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
-
-
-
-    - name: upload iptv
-
-      id: iptv
-
-      if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
-
-      run: |
-
-        echo "::set-output name=checksum::$(md5sum proxy/target/release/ip-to-vsock | awk '{print $1;}')"
-
-        aws s3 cp proxy/target/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-${{github.event.inputs.iptv-version}}-${{matrix.GOOS}}-${{matrix.GOARCH}}
-
-
-
+        echo "::set-output name=checksum::$(md5sum proxy/target/release/vsock-to-ip-transparent | awk '{print $1;}')"
+        aws s3 cp proxy/target/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
