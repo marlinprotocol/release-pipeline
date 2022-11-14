@@ -46,7 +46,7 @@ jobs:
       with:
         go-version: 1.18
     - name: build
-      run: cd dnsproxy && GOROOT=$GOROOT_1_19_X64 go build -mod=vendor
+      run: cd dnsproxy && go build -mod=vendor
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
