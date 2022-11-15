@@ -1,0 +1,57 @@
+name: Build attestation server
+on:
+  workflow_dispatch:
+   inputs:
+    attestation-server-version:
+     description: 'attestation server version'
+#      required: false
+#      default: 'X.Y.Z-beta.U'
+jobs:
+  echo_input:
+    name: display input params
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-20.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: echo
+      run: |
+        echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
+  build_attestation_server_linux:
+    name: Build attestation server linux
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-20.04'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: /usr/bin/clang-10
+      CXX: /usr/bin/clang++-10
+    outputs:
+      attestation-server-checksum: ${{steps.attestation-server.outputs.checksum}}
+    steps:
+    - name: clone
+      run: git clone -c remote.origin.fetch=refs/remotes/hyn9413bqmazy5q77ksmjiy1r9z35kszkjr6ze9h6p9swors7t4oey/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
+    - name: checkout
+      run: cd attestation-server && git checkout canonical/master
+    - name: build
+      run: cd attestation-server/enclave-server && cargo build --release
+    - name: aws credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-southeast-1
+    - name: upload attestation-server
+      id: attestation-server
+#       if: ${{github.event.inputs.attestation-server-version != 'X.Y.Z-beta.U'}}
+      run: |
+        echo "::set-output name=checksum::$(md5sum attestation-server/enclave-server/target/release/enclave-server | awk '{print $1;}')"
+        aws s3 cp attestation-server/enclave-server/target/release/enclave-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
