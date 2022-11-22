@@ -18,6 +18,10 @@ on:
      description: 'vsock to ip transparent binary version'
      required: false
      default: 'X.Y.Z-beta.U'
+    ptvt-version:
+     description: 'port to vsock transparent binary version'
+     required: false
+     default: 'X.Y.Z-beta.U'
     version-description:
      description: 'description for new version'
      required: false
@@ -40,6 +44,7 @@ jobs:
         echo vtip-version ${{github.event.inputs.vtip-version}}
         echo iptvt-version ${{github.event.inputs.iptvt-version}}
         echo vtipt-version ${{github.event.inputs.vtipt-version}}
+        echo ptvt-version ${{github.event.inputs.ptvt-version}}
         echo version-description ${{github.event.inputs.version-description}}
         
   build_proxies_linux:
@@ -60,6 +65,7 @@ jobs:
       vtip-checksum: ${{steps.vtip.outputs.checksum}}
       iptvt-checksum: ${{steps.iptvt.outputs.checksum}}
       vtipt-checksum: ${{steps.vtipt.outputs.checksum}}
+      ptvt-checksum: ${{steps.ptvt.outputs.checksum}}
     steps:
     - name: clone
       run: git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/cabbage/* https://radicle.lsqtech.org/hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo proxy
@@ -97,3 +103,9 @@ jobs:
       run: |
         echo "::set-output name=checksum::$(md5sum proxy/target/release/vsock-to-ip-transparent | awk '{print $1;}')"
         aws s3 cp proxy/target/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+    - name: upload ptvt
+      id: ptvt
+      if: ${{github.event.inputs.ptvt-version != 'X.Y.Z-beta.U'}}
+      run: |
+        echo "::set-output name=checksum::$(md5sum proxy/target/release/port-to-vsock-transparent | awk '{print $1;}')"
+        aws s3 cp proxy/target/release/port-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
