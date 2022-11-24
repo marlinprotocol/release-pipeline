@@ -38,7 +38,7 @@ jobs:
       attestation-server-checksum: ${{steps.attestation-server.outputs.checksum}}
     steps:
     - name: clone
-      run: git clone -c remote.origin.fetch=refs/remotes/hyn9413bqmazy5q77ksmjiy1r9z35kszkjr6ze9h6p9swors7t4oey/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
+      run: git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
     - name: checkout
       run: cd attestation-server && git checkout canonical/master
     - name: build
