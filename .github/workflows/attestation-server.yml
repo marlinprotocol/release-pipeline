@@ -37,12 +37,14 @@ jobs:
     outputs:
       attestation-server-checksum: ${{steps.attestation-server.outputs.checksum}}
     steps:
+    - name: setup rust
+      run: rustup update && rustup target add x86_64-unknown-linux-musl
     - name: clone
       run: git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
     - name: checkout
       run: cd attestation-server && git checkout canonical/master
     - name: build
-      run: cd attestation-server/enclave-server && cargo build --release
+      run: cd attestation-server && cargo build --release --target x86_64-unknown-linux-musl
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -53,5 +55,5 @@ jobs:
       id: attestation-server
 #       if: ${{github.event.inputs.attestation-server-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum attestation-server/enclave-server/target/release/enclave-server | awk '{print $1;}')"
-        aws s3 cp attestation-server/enclave-server/target/release/enclave-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server | awk '{print $1;}')"
+        aws s3 cp attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
