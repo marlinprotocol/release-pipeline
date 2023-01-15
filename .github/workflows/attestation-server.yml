@@ -56,4 +56,5 @@ jobs:
 #       if: ${{github.event.inputs.attestation-server-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server | awk '{print $1;}')"
+        upx attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server
         aws s3 cp attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
