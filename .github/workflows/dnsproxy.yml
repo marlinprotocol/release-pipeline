@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -44,9 +44,11 @@ jobs:
     - name: golang
       uses: actions/setup-go@v3.3.1
       with:
-        go-version: 1.18
+        go-version: 1.19
+    - name: musl
+      run: apt install musl-tools
     - name: build
-      run: cd dnsproxy && go build -mod=vendor
+      run: cd dnsproxy && CC=`which musl-gcc` go build -mod=vendor -ldflags='-s -w -linkmode external -extldflags "-static"'
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
