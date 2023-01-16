@@ -46,7 +46,7 @@ jobs:
       with:
         go-version: 1.19
     - name: musl
-      run: apt install musl-tools
+      run: sudo apt install musl-tools
     - name: build
       run: cd dnsproxy && CC=`which musl-gcc` go build -mod=vendor -ldflags='-s -w -linkmode external -extldflags "-static"'
     - name: aws credentials
