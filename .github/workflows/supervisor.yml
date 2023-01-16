@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -41,8 +41,14 @@ jobs:
       run: git clone https://github.com/ochinchina/supervisord
     - name: checkout
       run: cd supervisord && git checkout ${{github.events.inputs.supervisord-version}}
+    - name: golang
+      uses: actions/setup-go@v3.3.1
+      with:
+        go-version: 1.19
+    - name: musl
+      run: sudo apt install musl-tools
     - name: build
-      run: cd supervisord && go generate && go build -tags release -a -ldflags "-linkmode external -extldflags -static" -o supervisord
+      run: cd supervisord && go generate && CC=`which musl-gcc` go build -tags release -a -ldflags " -s -w -linkmode external -extldflags -static" -o supervisord
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -54,4 +60,4 @@ jobs:
 #       if: ${{github.event.inputs.supervisord-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum supervisord/supervisord | awk '{print $1;}')"
-        aws s3 cp supervisord/supervisord s3://public.artifacts.marlin.pro/projects/enclaves/supervisord_${{github.event.inputs.supervisord-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        upx supervisord/supervisord && aws s3 cp supervisord/supervisord s3://public.artifacts.marlin.pro/projects/enclaves/supervisord_${{github.event.inputs.supervisord-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
