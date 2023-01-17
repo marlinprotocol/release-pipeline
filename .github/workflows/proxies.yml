@@ -33,10 +33,15 @@ jobs:
       matrix:
         include:
         - os: 'ubuntu-22.04'
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-    runs-on: ${{ matrix.os }}
+        - os: 'ubuntu-22.04'
+          runs-on: [ARM64]
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
     steps:
     - name: echo
       run: |
