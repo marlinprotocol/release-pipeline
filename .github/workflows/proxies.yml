@@ -38,10 +38,11 @@ jobs:
           GOOS: linux
           GOARCH: amd64
         - os: 'ubuntu-22.04'
-          runs-on: [ARM64]
+          runs-on: ARM64
           build_type: Release
           GOOS: linux
           GOARCH: arm64
+    runs-on: ${{ matrix.runs-on }}
     steps:
     - name: echo
       run: |
