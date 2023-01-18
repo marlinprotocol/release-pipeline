@@ -67,7 +67,7 @@ jobs:
           runs-on: self-hosted
           build_type: Release
           GOOS: linux
-          GOARCH: arm64
+          GOARCH: aarch64
     runs-on: ${{ matrix.runs-on }}
     env:
       CC: /usr/bin/clang-10
@@ -80,13 +80,13 @@ jobs:
       ptvt-checksum: ${{steps.ptvt.outputs.checksum}}
     steps:
     - name: update rust
-      run: rustup update && rustup target add x86_64-unknown-linux-musl
+      run: rustup update && rustup target add ${{matrix.GOARCH}}-unknown-linux-musl
     - name: clone
       run: rm -rf proxy && git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/cabbage/* https://radicle.lsqtech.org/hnrkqsu1gmf1quzq3ypjrsau9czaorwnn44zo proxy
     - name: checkout
       run: cd proxy && git checkout cabbage/master
     - name: build
-      run: cd proxy && cargo build --release --target x86_64-unknown-linux-musl
+      run: cd proxy && cargo build --release --target ${{matrix.GOARCH}}-unknown-linux-musl
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -97,34 +97,34 @@ jobs:
       id: iptv
       if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum proxy/target/x86_64-unknown-linux-musl/release/ip-to-vsock | awk '{print $1;}')"
-        upx proxy/target/x86_64-unknown-linux-musl/release/ip-to-vsock
-        aws s3 cp proxy/target/x86_64-unknown-linux-musl/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/ip-to-vsock | awk '{print $1;}')"
+        upx proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/ip-to-vsock
+        aws s3 cp proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtip
       id: vtip
       if: ${{github.event.inputs.vtip-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum proxy/target/x86_64-unknown-linux-musl/release/vsock-to-ip | awk '{print $1;}')"
-        upx proxy/target/x86_64-unknown-linux-musl/release/vsock-to-ip
-        aws s3 cp proxy/target/x86_64-unknown-linux-musl/release/vsock-to-ip s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/vsock-to-ip | awk '{print $1;}')"
+        upx proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/vsock-to-ip
+        aws s3 cp proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/vsock-to-ip s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload iptvt
       id: iptvt
       if: ${{github.event.inputs.iptvt-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum proxy/target/x86_64-unknown-linux-musl/release/ip-to-vsock-transparent | awk '{print $1;}')"
-        upx proxy/target/x86_64-unknown-linux-musl/release/ip-to-vsock-transparent
-        aws s3 cp proxy/target/x86_64-unknown-linux-musl/release/ip-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/ip-to-vsock-transparent | awk '{print $1;}')"
+        upx proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/ip-to-vsock-transparent
+        aws s3 cp proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/ip-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtipt
       id: vtipt
       if: ${{github.event.inputs.vtipt-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum proxy/target/x86_64-unknown-linux-musl/release/vsock-to-ip-transparent | awk '{print $1;}')"
-        upx proxy/target/x86_64-unknown-linux-musl/release/vsock-to-ip-transparent
-        aws s3 cp proxy/target/x86_64-unknown-linux-musl/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/vsock-to-ip-transparent | awk '{print $1;}')"
+        upx proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/vsock-to-ip-transparent
+        aws s3 cp proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload ptvt
       id: ptvt
       if: ${{github.event.inputs.ptvt-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum proxy/target/x86_64-unknown-linux-musl/release/port-to-vsock-transparent | awk '{print $1;}')"
-        upx proxy/target/x86_64-unknown-linux-musl/release/port-to-vsock-transparent
-        aws s3 cp proxy/target/x86_64-unknown-linux-musl/release/port-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/port-to-vsock-transparent | awk '{print $1;}')"
+        upx proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/port-to-vsock-transparent
+        aws s3 cp proxy/target/${{matrix.GOARCH}}-unknown-linux-musl/release/port-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
