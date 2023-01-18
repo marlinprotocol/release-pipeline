@@ -7,44 +7,38 @@ on:
 #      required: false
 #      default: 'X.Y.Z-beta.U'
 jobs:
-  echo_input:
-    name: display input params
-    strategy:
-      matrix:
-        include:
-        - os: 'ubuntu-22.04'
-          build_type: Release
-          GOOS: linux
-          GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    steps:
-    - name: echo
-      run: |
-        echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
   build_attestation_server_linux:
     name: Build attestation server linux
     strategy:
       matrix:
         include:
         - os: 'ubuntu-22.04'
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      CC: /usr/bin/clang-10
-      CXX: /usr/bin/clang++-10
+          target: x86_64-unknown-linux-musl
+        - os: 'ubuntu-22.04'
+          runs-on: self-hosted
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
+          target: aarch64-unknown-linux-musl
+    runs-on: ${{ matrix.runs-on }}
     outputs:
       attestation-server-checksum: ${{steps.attestation-server.outputs.checksum}}
     steps:
+    - name: echo
+      run: |
+        echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
     - name: setup rust
-      run: rustup update && rustup target add x86_64-unknown-linux-musl
+      run: rustup update && rustup target add ${{ matrix.target }}
     - name: clone
-      run: git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
+      run: rm -rf attestation-server && git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
     - name: checkout
       run: cd attestation-server && git checkout canonical/master
     - name: build
-      run: cd attestation-server && cargo build --release --target x86_64-unknown-linux-musl
+      run: cd attestation-server && cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -55,6 +49,6 @@ jobs:
       id: attestation-server
 #       if: ${{github.event.inputs.attestation-server-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server | awk '{print $1;}')"
-        upx attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server
-        aws s3 cp attestation-server/target/x86_64-unknown-linux-musl/release/attestation-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum attestation-server/target/${{ matrix.target }}/release/attestation-server | awk '{print $1;}')"
+        upx attestation-server/target/${{ matrix.target }}/release/attestation-server
+        aws s3 cp attestation-server/target/${{ matrix.target }}/release/attestation-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
