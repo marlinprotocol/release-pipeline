@@ -27,18 +27,23 @@ jobs:
       matrix:
         include:
         - os: 'ubuntu-22.04'
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      CC: /usr/bin/clang-10
-      CXX: /usr/bin/clang++-10
+          target: x86_64-unknown-linux-musl
+        - os: 'ubuntu-22.04'
+          runs-on: self-hosted
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
+          target: aarch64-unknown-linux-musl
+    runs-on: ${{ matrix.runs-on }}
     outputs:
       dnsproxy-checksum: ${{steps.dnsproxy.outputs.checksum}}
     steps:
     - name: clone
-      run: git clone https://github.com/AdguardTeam/dnsproxy
+      run: rm -rf dnsproxy && git clone https://github.com/AdguardTeam/dnsproxy
     - name: checkout
       run: cd dnsproxy && git checkout ${{github.events.inputs.dnsproxy-version}}
     - name: golang
@@ -46,7 +51,7 @@ jobs:
       with:
         go-version: 1.19
     - name: musl
-      run: sudo apt install musl-tools
+      run: sudo apt install -y musl-tools
     - name: build
       run: cd dnsproxy && CC=`which musl-gcc` go build -mod=vendor -ldflags='-s -w -linkmode external -extldflags "-static"'
     - name: aws credentials
@@ -60,4 +65,5 @@ jobs:
 #       if: ${{github.event.inputs.dnsproxy-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum dnsproxy/dnsproxy | awk '{print $1;}')"
-        upx dnsproxy/dnsproxy && aws s3 cp dnsproxy/dnsproxy s3://public.artifacts.marlin.pro/projects/enclaves/dnsproxy_${{github.event.inputs.dnsproxy-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        upx dnsproxy/dnsproxy
+        aws s3 cp dnsproxy/dnsproxy s3://public.artifacts.marlin.pro/projects/enclaves/dnsproxy_${{github.event.inputs.dnsproxy-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
