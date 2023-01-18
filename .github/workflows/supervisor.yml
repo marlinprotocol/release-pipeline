@@ -17,26 +17,30 @@ jobs:
           GOOS: linux
           GOARCH: amd64
     runs-on: ${{ matrix.os }}
-    steps:
-    - name: echo
-      run: |
-        echo supervisord-version ${{github.event.inputs.supervisord-version}}
   build_supervisord_linux:
     name: Build supervisord linux
     strategy:
       matrix:
         include:
         - os: 'ubuntu-22.04'
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      CC: /usr/bin/clang-10
-      CXX: /usr/bin/clang++-10
+          target: x86_64-unknown-linux-musl
+        - os: 'ubuntu-22.04'
+          runs-on: self-hosted
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
+          target: aarch64-unknown-linux-musl
+    runs-on: ${{ matrix.runs-on }}
     outputs:
       supervisord-checksum: ${{steps.supervisord.outputs.checksum}}
     steps:
+    - name: echo
+      run: |
+        echo supervisord-version ${{github.event.inputs.supervisord-version}}
     - name: clone
       run: git clone https://github.com/ochinchina/supervisord
     - name: checkout
@@ -60,4 +64,5 @@ jobs:
 #       if: ${{github.event.inputs.supervisord-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum supervisord/supervisord | awk '{print $1;}')"
-        upx supervisord/supervisord && aws s3 cp supervisord/supervisord s3://public.artifacts.marlin.pro/projects/enclaves/supervisord_${{github.event.inputs.supervisord-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        upx supervisord/supervisord
+        aws s3 cp supervisord/supervisord s3://public.artifacts.marlin.pro/projects/enclaves/supervisord_${{github.event.inputs.supervisord-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
