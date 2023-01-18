@@ -32,7 +32,7 @@ jobs:
       run: |
         echo supervisord-version ${{github.event.inputs.supervisord-version}}
     - name: clone
-      run: git clone https://github.com/ochinchina/supervisord
+      run: rm -rf supervisord && git clone https://github.com/ochinchina/supervisord
     - name: checkout
       run: cd supervisord && git checkout ${{github.events.inputs.supervisord-version}}
     - name: golang
