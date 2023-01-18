@@ -7,20 +7,6 @@ on:
 #      required: false
 #      default: 'X.Y.Z-beta.U'
 jobs:
-  echo_input:
-    name: display input params
-    strategy:
-      matrix:
-        include:
-        - os: 'ubuntu-22.04'
-          build_type: Release
-          GOOS: linux
-          GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    steps:
-    - name: echo
-      run: |
-        echo dnsproxy-version ${{github.event.inputs.dnsproxy-version}}
   build_dnsproxy_linux:
     name: Build dnsproxy linux
     strategy:
@@ -42,6 +28,9 @@ jobs:
     outputs:
       dnsproxy-checksum: ${{steps.dnsproxy.outputs.checksum}}
     steps:
+    - name: echo
+      run: |
+        echo dnsproxy-version ${{github.event.inputs.dnsproxy-version}}
     - name: clone
       run: rm -rf dnsproxy && git clone https://github.com/AdguardTeam/dnsproxy
     - name: checkout
