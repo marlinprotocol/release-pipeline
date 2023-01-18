@@ -40,7 +40,7 @@ jobs:
       with:
         go-version: 1.19
     - name: musl
-      run: sudo apt install musl-tools
+      run: sudo apt install -y musl-tools
     - name: build
       run: cd supervisord && go generate && CC=`which musl-gcc` go build -tags release -a -ldflags " -s -w -linkmode external -extldflags -static" -o supervisord
     - name: aws credentials
