@@ -38,7 +38,7 @@ jobs:
           GOOS: linux
           GOARCH: amd64
         - os: 'ubuntu-22.04'
-          runs-on: ARM64
+          runs-on: self-hosted
           build_type: Release
           GOOS: linux
           GOARCH: arm64
