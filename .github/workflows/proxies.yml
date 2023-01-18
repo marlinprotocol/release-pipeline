@@ -59,10 +59,16 @@ jobs:
       matrix:
         include:
         - os: 'ubuntu-22.04'
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-    runs-on: ${{ matrix.os }}
+        - os: 'ubuntu-22.04'
+          runs-on: self-hosted
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
+    runs-on: ${{ matrix.runs-on }}
     env:
       CC: /usr/bin/clang-10
       CXX: /usr/bin/clang++-10
