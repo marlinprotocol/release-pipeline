@@ -71,10 +71,11 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-18.04'
+        - os: 'ubuntu-22.04'
+          runs-on: self-hosted
           build_type: Release
           GOOS: linux
-          GOARCH: amd64
+          GOARCH: arm64
     runs-on: ${{ matrix.os }}
     env: 
       CC: /usr/bin/clang-10
