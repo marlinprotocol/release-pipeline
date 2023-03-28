@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-18.04'
+        - os: 'ubuntu-20.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -39,7 +39,7 @@ jobs:
     name: Build mev-bor amd
     strategy:
       matrix:
-        os: ['ubuntu-18.04']
+        os: ['ubuntu-20.04']
         build_type: [Release]
     runs-on: ${{ matrix.os }}
     outputs:
@@ -72,7 +72,7 @@ jobs:
     name: Build mev-bor_arm
     strategy:
       matrix:
-        os: ['ubuntu-18.04']
+        os: ['ubuntu-20.04']
         build_type: [Release]
     runs-on: [self-hosted, linux, ARM64]
     outputs:
