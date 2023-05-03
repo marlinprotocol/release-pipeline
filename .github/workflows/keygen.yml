@@ -34,9 +34,9 @@ jobs:
     - name: setup rust
       run: rustup update && rustup target add ${{ matrix.target }}
     - name: clone
-      run: rm -rf keygen && git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrkpb4bgkwuxt5896daqio9f6f5198gg7iqy keygen
+      run: rm -rf keygen && git clone https://github.com/marlinprotocol/keygen
     - name: checkout
-      run: cd keygen && git checkout canonical/master
+      run: cd keygen && git checkout master
     - name: build
       run: cd keygen && cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
