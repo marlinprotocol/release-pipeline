@@ -12,10 +12,18 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-20.04'
+        - os: 'ubuntu-22.04'
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
+          target: x86_64-unknown-linux-musl
+        - os: 'ubuntu-22.04'
+          runs-on: self-hosted
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
+          target: aarch64-unknown-linux-musl
     runs-on: ${{ matrix.os }}
     steps:
     - name: echo
@@ -37,12 +45,14 @@ jobs:
     outputs:
       control-plane-checksum: ${{steps.control-plane.outputs.checksum}}
     steps:
+    - name: setup rust
+      run: rustup update && rustup target add ${{ matrix.target }}
     - name: clone
-      run: git clone https://radicle.lsqtech.org/hnrkk4b3996ywswdx9ck1x9op1kqij5s59a8o control-plane
-#     - name: checkout
-#       run: cd control-plane && git checkout canonical/master
+      run: rm -rf control-plane && git clone https://github.com/marlinprotocol/control-plane
+    - name: checkout
+      run: cd control-plane && git checkout master
     - name: build
-      run: cd control-plane && cargo build --release
+      run: cd control-plane && cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -53,5 +63,5 @@ jobs:
       id: control-plane
 #       if: ${{github.event.inputs.control-plane-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum control-plane/target/release/control-plane | awk '{print $1;}')"
-        aws s3 cp control-plane/target/release/control-plane s3://public.artifacts.marlin.pro/projects/enclaves/control-plane_${{github.event.inputs.control-plane-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum control-plane/target/${{ matrix.target }}/release/control-plane | awk '{print $1;}')"
+        aws s3 cp control-plane/target/${{ matrix.target }}/release/control-plane s3://public.artifacts.marlin.pro/projects/enclaves/control-plane_${{github.event.inputs.control-plane-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
