@@ -7,8 +7,8 @@ on:
 #      required: false
 #      default: 'X.Y.Z-beta.U'
 jobs:
-  echo_input:
-    name: display input params
+  build_keygen_linux:
+    name: Build keygen linux
     strategy:
       matrix:
         include:
@@ -25,23 +25,6 @@ jobs:
           GOARCH: arm64
           target: aarch64-unknown-linux-musl
     runs-on: ${{ matrix.os }}
-    steps:
-    - name: echo
-      run: |
-        echo control-plane-version ${{github.event.inputs.control-plane-version}}
-  build_control_plane_linux:
-    name: Build control plane linux
-    strategy:
-      matrix:
-        include:
-        - os: 'ubuntu-20.04'
-          build_type: Release
-          GOOS: linux
-          GOARCH: amd64
-    runs-on: ${{ matrix.os }}
-    env:
-      CC: /usr/bin/clang-10
-      CXX: /usr/bin/clang++-10
     outputs:
       control-plane-checksum: ${{steps.control-plane.outputs.checksum}}
     steps:
