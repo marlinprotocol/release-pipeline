@@ -31,6 +31,8 @@ jobs:
     - name: echo
       run: |
         echo keygen-version ${{github.event.inputs.keygen-version}}
+    - name: dependencies for libsodium
+      run: sudo apt-get install clang
     - name: setup rust
       run: rustup update && rustup target add ${{ matrix.target }}
     - name: clone
