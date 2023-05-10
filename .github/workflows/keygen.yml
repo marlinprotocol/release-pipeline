@@ -38,7 +38,7 @@ jobs:
     - name: checkout
       run: cd keygen && git checkout master
     - name: build
-      run: cd keygen && cargo build --release --target ${{ matrix.target }}
+      run: cd keygen && CC=musl-gcc cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
