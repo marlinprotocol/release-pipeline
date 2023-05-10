@@ -32,7 +32,7 @@ jobs:
       run: |
         echo keygen-version ${{github.event.inputs.keygen-version}}
     - name: setup rust
-      run: rustup update && rustup target add ${{ matrix.target }}
+      run: rustup update && rustup target add ${{ matrix.target }} && sudo apt-get install -y musl-tools
     - name: clone
       run: rm -rf keygen && git clone https://github.com/marlinprotocol/keygen
     - name: checkout
