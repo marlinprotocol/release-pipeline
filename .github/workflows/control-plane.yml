@@ -29,13 +29,13 @@ jobs:
       control-plane-checksum: ${{steps.control-plane.outputs.checksum}}
     steps:
     - name: setup rust
-      run: rustup update && rustup target add ${{ matrix.target }}
+      run: rustup update && rustup target add ${{ matrix.target }} && sudo apt-get install -y musl-tools
     - name: clone
       run: rm -rf control-plane && git clone https://github.com/marlinprotocol/control-plane
     - name: checkout
       run: cd control-plane && git checkout master
     - name: build
-      run: cd control-plane && cargo build --release --target ${{ matrix.target }}
+      run: cd control-plane && CC=musl-gcc cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
