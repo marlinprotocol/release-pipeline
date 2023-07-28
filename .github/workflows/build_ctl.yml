@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-18.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-18.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -58,8 +58,9 @@ jobs:
     - uses: actions/setup-go@v2
     - name: update
       run: |
-        sudo apt-get update
-        sudo apt-get upgrade
+        sudo apt-get update -y
+        sudo apt-get upgrade -y
+        sudo apt-get install -y musl-tools
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -70,7 +71,7 @@ jobs:
       id: marlinctl_beta
       if: ${{github.event.inputs.marlinctl-version-main != 'X.Y.Z'}} && ${{github.event.inputs.marlinctl-version-beta != 'beta.U'}}
       run: |
-        sh mk.sh ${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}
+        CC=`which musl-gcc` ./mk.sh ${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}
         echo "::set-output name=checksum::$(md5sum build/marlinctl | awk '{print $1;}')"
         aws s3 cp build/marlinctl s3://beta.artifacts.marlin.pro/projects/marlinctl_beta/${{github.event.inputs.marlinctl-version-main}}-${{github.event.inputs.marlinctl-version-beta}}/marlinctl-${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: Make marlinctl_release
@@ -88,7 +89,7 @@ jobs:
      strategy:
       matrix:
         include:
-        - os: 'ubuntu-18.04'
+        - os: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
