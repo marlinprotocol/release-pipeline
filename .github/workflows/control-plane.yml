@@ -46,7 +46,7 @@ jobs:
     - name: set env var
       run: echo "CARGO_TARGET_${{matrix.ARCH_UPPER}}_UNKNOWN_LINUX_MUSL_LINKER=$TARGET_CC" >> $GITHUB_ENV
     - name: setup rust
-      run: rustup update && rustup target add $CARGO_BUILD_TARGET && curl --proto '=https' --tlsv1.2 -sSf https://musl.cc/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}.tgz | tar -xz
+      run: rustup update && rustup target add $CARGO_BUILD_TARGET && curl --proto '=https' --tlsv1.2 -sSf https://musl.cc/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}.tgz | tar -xz && pwd
     - name: clone
       run: rm -rf control-plane && git clone https://github.com/marlinprotocol/control-plane
     - name: checkout
