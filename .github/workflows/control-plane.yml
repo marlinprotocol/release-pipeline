@@ -40,7 +40,7 @@ jobs:
     - name: set env var
       run: echo "HOST_CC=gcc" >> $GITHUB_ENV
     - name: set env var
-      run: echo "TARGET_CC=${{GITHUB_WORKSPACE}}/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}/bin/$MUSL_TOOLCHAIN_NAME-gcc" >> $GITHUB_ENV
+      run: echo "TARGET_CC=${{env.GITHUB_WORKSPACE}}/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}/bin/$MUSL_TOOLCHAIN_NAME-gcc" >> $GITHUB_ENV
     - name: set env var
       run: echo "CC_${{matrix.ARCH_LOWER}}_unknown_linux_musl=$TARGET_CC" >> $GITHUB_ENV
     - name: set env var
