@@ -62,4 +62,4 @@ jobs:
 #       if: ${{github.event.inputs.caa-binder-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum oyster-caddy-account-uri/signer/target/$CARGO_BUILD_TARGET/release/signer | awk '{print $1;}')"
-        aws s3 cp oyster-caddy-account-uri/signer/target/$CARGO_BUILD_TARGET/release/signer s3://public.artifacts.marlin.pro/projects/enclaves/caa-binder_${{github.event.inputs.control-plane-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp oyster-caddy-account-uri/signer/target/$CARGO_BUILD_TARGET/release/signer s3://public.artifacts.marlin.pro/projects/enclaves/caa-binder_${{github.event.inputs.caa-binder-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
