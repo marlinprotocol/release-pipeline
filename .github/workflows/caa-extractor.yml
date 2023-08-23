@@ -43,6 +43,8 @@ jobs:
       run: echo "CC_${{matrix.ARCH_LOWER}}_unknown_linux_musl=$TARGET_CC" >> $GITHUB_ENV
     - name: set env var
       run: echo "CARGO_TARGET_${{matrix.ARCH_UPPER}}_UNKNOWN_LINUX_MUSL_LINKER=$TARGET_CC" >> $GITHUB_ENV
+    - name: set env var
+      run: echo "CARGO_TARGET_${{matrix.ARCH_UPPER}}_UNKNOWN_LINUX_MUSL_RUSTFLAGS=-C link-arg=$GITHUB_WORKSPACE/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}/lib/libc.a" >> $GITHUB_ENV
     - name: setup rust
       run: rustup update && rustup target add $CARGO_BUILD_TARGET && curl --proto '=https' --tlsv1.2 -sSf https://musl.cc/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}.tgz | tar -xz && pwd
     - name: clone
