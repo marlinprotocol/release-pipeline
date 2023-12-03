@@ -34,7 +34,7 @@ jobs:
     steps:
     - name: set env var
       run: echo "CFLAGS=-mno-outline-atomics" >> $GITHUB_ENV
-      if: matrix.ARCH_LOWER == aarch64
+      if: matrix.ARCH_LOWER == 'aarch64'
     - name: set env var
       run: echo "CARGO_BUILD_TARGET=${{matrix.ARCH_LOWER}}-unknown-linux-musl" >> $GITHUB_ENV
     - name: set env var
