@@ -64,5 +64,5 @@ jobs:
 #       if: ${{github.event.inputs.oyster-serverless-version != 'X.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(md5sum oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless | awk '{print $1;}')"
-        upx oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless
+        # upx oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless
         aws s3 cp oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless s3://public.artifacts.marlin.pro/projects/enclaves/oyster-serverless_${{github.event.inputs.oyster-serverless-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
