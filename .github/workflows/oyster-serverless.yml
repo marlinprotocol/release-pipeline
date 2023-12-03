@@ -17,29 +17,42 @@ jobs:
           build_type: Release
           GOOS: linux
           GOARCH: amd64
-          target: x86_64-unknown-linux-musl
+          ARCH_LOWER: x86_64
+          ARCH_UPPER: X86_64
+          MUSL_TOOLCHAIN_TYPE: native
         - os: 'ubuntu-22.04'
-          runs-on: self-hosted
+          runs-on: 'ubuntu-22.04'
           build_type: Release
           GOOS: linux
           GOARCH: arm64
-          target: aarch64-unknown-linux-musl
+          ARCH_LOWER: aarch64
+          ARCH_UPPER: AARCH64
+          MUSL_TOOLCHAIN_TYPE: cross
           CFLAGS: -mno-outline-atomics
     runs-on: ${{ matrix.runs-on }}
     outputs:
       oyster-serverless-checksum: ${{steps.oyster-serverless.outputs.checksum}}
     steps:
-    - name: echo
-      run: |
-        echo oyster-serverless-version ${{github.event.inputs.oyster-serverless-version}}
+    - name: set env var
+      run: echo "CARGO_BUILD_TARGET=${{matrix.ARCH_LOWER}}-unknown-linux-musl" >> $GITHUB_ENV
+    - name: set env var
+      run: echo "MUSL_TOOLCHAIN_NAME=${{matrix.ARCH_LOWER}}-linux-musl" >> $GITHUB_ENV
+    - name: set env var
+      run: echo "HOST_CC=gcc" >> $GITHUB_ENV
+    - name: set env var
+      run: echo "TARGET_CC=$GITHUB_WORKSPACE/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}/bin/$MUSL_TOOLCHAIN_NAME-gcc" >> $GITHUB_ENV
+    - name: set env var
+      run: echo "CC_${{matrix.ARCH_LOWER}}_unknown_linux_musl=$TARGET_CC" >> $GITHUB_ENV
+    - name: set env var
+      run: echo "CARGO_TARGET_${{matrix.ARCH_UPPER}}_UNKNOWN_LINUX_MUSL_LINKER=$TARGET_CC" >> $GITHUB_ENV
     - name: setup rust
-      run: rustup update && rustup target add ${{ matrix.target }} && sudo apt-get install -y musl-tools
+      run: rustup update && rustup target add $CARGO_BUILD_TARGET && curl --proto '=https' --tlsv1.2 -sSf https://musl.cc/$MUSL_TOOLCHAIN_NAME-${{matrix.MUSL_TOOLCHAIN_TYPE}}.tgz | tar -xz && pwd
     - name: clone
-      run: rm -rf oyster-serverless && git clone https://github.com/marlinprotocol/oyster-serverless oyster-serverless
+      run: rm -rf oyster-serverless && git clone https://github.com/marlinprotocol/oyster-serverless
     - name: checkout
       run: cd oyster-serverless && git checkout master
     - name: build
-      run: cd oyster-serverless && CC=musl-gcc cargo build --release --target ${{ matrix.target }}
+      run: cd oyster-serverless && cargo build --release
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -50,6 +63,6 @@ jobs:
       id: oyster-serverless
 #       if: ${{github.event.inputs.oyster-serverless-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-serverless/target/${{ matrix.target }}/release/oyster-serverless | awk '{print $1;}')"
-        upx oyster-serverless/target/${{ matrix.target }}/release/oyster-serverless
-        aws s3 cp oyster-serverless/target/${{ matrix.target }}/release/oyster-serverless s3://public.artifacts.marlin.pro/projects/enclaves/oyster-serverless_${{github.event.inputs.oyster-serverless-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless | awk '{print $1;}')"
+        upx oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless
+        aws s3 cp oyster-serverless/target/$CARGO_BUILD_TARGET/release/oyster-serverless s3://public.artifacts.marlin.pro/projects/enclaves/oyster-serverless_${{github.event.inputs.oyster-serverless-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
