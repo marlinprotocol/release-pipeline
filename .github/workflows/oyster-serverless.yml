@@ -28,11 +28,13 @@ jobs:
           ARCH_LOWER: aarch64
           ARCH_UPPER: AARCH64
           MUSL_TOOLCHAIN_TYPE: cross
-          CFLAGS: -mno-outline-atomics
     runs-on: ${{ matrix.runs-on }}
     outputs:
       oyster-serverless-checksum: ${{steps.oyster-serverless.outputs.checksum}}
     steps:
+    - name: set env var
+      run: echo "CFLAGS=-mno-outline-atomics" >> $GITHUB_ENV
+      if: matrix.ARCH_LOWER == aarch64
     - name: set env var
       run: echo "CARGO_BUILD_TARGET=${{matrix.ARCH_LOWER}}-unknown-linux-musl" >> $GITHUB_ENV
     - name: set env var
