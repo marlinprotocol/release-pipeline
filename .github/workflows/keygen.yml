@@ -38,7 +38,7 @@ jobs:
     - name: checkout
       run: cd keygen && git checkout master
     - name: build
-      run: cd keygen && CC=musl-gcc cargo build --release --target ${{ matrix.target }}
+      run: cd keygen && CC=musl-gcc cargo build --release --target ${{ matrix.target }} --bin keygen_ed25519
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -49,6 +49,6 @@ jobs:
       id: keygen
 #       if: ${{github.event.inputs.keygen-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum keygen/target/${{ matrix.target }}/release/keygen | awk '{print $1;}')"
-        upx keygen/target/${{ matrix.target }}/release/keygen
-        aws s3 cp keygen/target/${{ matrix.target }}/release/keygen s3://public.artifacts.marlin.pro/projects/enclaves/keygen_${{github.event.inputs.keygen-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum keygen/target/${{ matrix.target }}/release/keygen_ed25519 | awk '{print $1;}')"
+        upx keygen/target/${{ matrix.target }}/release/keygen_ed25519
+        aws s3 cp keygen/target/${{ matrix.target }}/release/keygen_ed25519 s3://public.artifacts.marlin.pro/projects/enclaves/keygen_${{github.event.inputs.keygen-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
