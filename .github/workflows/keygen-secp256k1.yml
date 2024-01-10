@@ -34,7 +34,7 @@ jobs:
     - name: setup rust
       run: rustup update && rustup target add ${{ matrix.target }} && sudo apt-get install -y musl-tools
     - name: clone
-      run: rm -rf keygen-secp256k1 && git clone https://github.com/marlinprotocol/oyster-keygen keygen-secp256k1
+      run: rm -rf keygen-secp256k1 && git clone https://github.com/marlinprotocol/keygen keygen-secp256k1
     - name: checkout
       run: cd keygen-secp256k1 && git checkout master
     - name: build
