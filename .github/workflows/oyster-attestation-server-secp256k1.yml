@@ -51,4 +51,4 @@ jobs:
       run: |
         echo "::set-output name=checksum::$(md5sum oyster-attestation-server-secp256k1/target/${{ matrix.target }}/release/oyster-attestation-server-secp256k1 | awk '{print $1;}')"
         upx oyster-attestation-server-secp256k1/target/${{ matrix.target }}/release/oyster-attestation-server-secp256k1
-        aws s3 cp oyster-attestation-server-secp256k1/target/${{ matrix.target }}/release/oyster-attestation-server-secp256k1 s3://public.artifacts.marlin.pro/projects/enclaves/oyster-attestation-server-secp256k1_${{github.event.inputs.oyster-attestation-server-secp256k1-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp oyster-attestation-server-secp256k1/target/${{ matrix.target }}/release/oyster-attestation-server-secp256k1 s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server-secp256k1_${{github.event.inputs.oyster-attestation-server-secp256k1-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
