@@ -51,4 +51,4 @@ jobs:
       run: |
         echo "::set-output name=checksum::$(md5sum oyster-attestation-verifier/target/${{ matrix.target }}/release/oyster-attestation-verifier | awk '{print $1;}')"
         upx oyster-attestation-verifier/target/${{ matrix.target }}/release/oyster-attestation-verifier
-        aws s3 cp oyster-attestation-verifier/target/${{ matrix.target }}/release/oyster-attestation-verifier s3://public.artifacts.marlin.pro/projects/enclaves/oyster-attestation-verifier_${{github.event.inputs.oyster-attestation-verifier-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp oyster-attestation-verifier/target/${{ matrix.target }}/release/oyster-attestation-verifier s3://public.artifacts.marlin.pro/projects/enclaves/attestation-verifier_${{github.event.inputs.oyster-attestation-verifier-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
