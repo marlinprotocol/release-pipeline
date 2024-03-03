@@ -38,7 +38,7 @@ jobs:
     - name: checkout
       run: cd keygen-secp256k1 && git checkout master
     - name: build
-      run: cd keygen-secp256k1 && CC=musl-gcc cargo build --release --target ${{ matrix.target }} --bin keygen_secp256k1
+      run: cd keygen-secp256k1 && CC=musl-gcc cargo build --release --target ${{ matrix.target }} --bin keygen-secp256k1
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -49,6 +49,6 @@ jobs:
       id: keygen-secp256k1
 #       if: ${{github.event.inputs.keygen-secp256k1-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum keygen-secp256k1/target/${{ matrix.target }}/release/keygen_secp256k1 | awk '{print $1;}')"
-        upx keygen-secp256k1/target/${{ matrix.target }}/release/keygen_secp256k1
-        aws s3 cp keygen-secp256k1/target/${{ matrix.target }}/release/keygen_secp256k1 s3://public.artifacts.marlin.pro/projects/enclaves/keygen-secp256k1_${{github.event.inputs.keygen-secp256k1-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum keygen-secp256k1/target/${{ matrix.target }}/release/keygen-secp256k1 | awk '{print $1;}')"
+        upx keygen-secp256k1/target/${{ matrix.target }}/release/keygen-secp256k1
+        aws s3 cp keygen-secp256k1/target/${{ matrix.target }}/release/keygen-secp256k1 s3://public.artifacts.marlin.pro/projects/enclaves/keygen-secp256k1_${{github.event.inputs.keygen-secp256k1-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
