@@ -63,11 +63,11 @@ jobs:
     - name: update rust
       run: rustup update && rustup target add ${{matrix.target}}
     - name: clone
-      run: rm -rf oyster-raw-proxy && git clone https://github.com/marlinprotocol/oyster-raw-proxy oyster-raw-proxy
+      run: rm -rf oyster-tcp-proxy && git clone https://github.com/marlinprotocol/oyster-tcp-proxy oyster-tcp-proxy
     - name: checkout
-      run: cd oyster-raw-proxy && git checkout master
+      run: cd oyster-tcp-proxy && git checkout master
     - name: build
-      run: cd oyster-raw-proxy && cargo build --release --target ${{matrix.target}}
+      run: cd oyster-tcp-proxy && cargo build --release --target ${{matrix.target}}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -78,34 +78,34 @@ jobs:
       id: iptv
       if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock | awk '{print $1;}')"
-        upx oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock | awk '{print $1;}')"
+        upx oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock
+        aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtip
       id: vtip
       if: ${{github.event.inputs.vtip-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip | awk '{print $1;}')"
-        upx oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip | awk '{print $1;}')"
+        upx oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip
+        aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload iptvt
       id: iptvt
       if: ${{github.event.inputs.iptvt-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent | awk '{print $1;}')"
-        upx oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent | awk '{print $1;}')"
+        upx oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent
+        aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtipt
       id: vtipt
       if: ${{github.event.inputs.vtipt-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent | awk '{print $1;}')"
-        upx oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent | awk '{print $1;}')"
+        upx oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent
+        aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload ptvt
       id: ptvt
       if: ${{github.event.inputs.ptvt-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-raw-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent | awk '{print $1;}')"
-        upx oyster-raw-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent | awk '{print $1;}')"
+        upx oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent
+        aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
