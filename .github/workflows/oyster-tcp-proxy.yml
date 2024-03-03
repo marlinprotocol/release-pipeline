@@ -1,4 +1,4 @@
-name: Build proxies
+name: Build tcp proxies
 on:
   workflow_dispatch:
    inputs:
