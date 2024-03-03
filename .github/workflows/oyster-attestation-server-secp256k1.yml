@@ -1,4 +1,4 @@
-name: Build oyster-attestation-server-secp256k1
+name: Build attestation server - secp256k1
 on:
   workflow_dispatch:
    inputs:
