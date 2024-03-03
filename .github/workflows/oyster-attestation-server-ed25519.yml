@@ -1,4 +1,4 @@
-name: Build attestation server
+name: Build attestation server - ed25519
 on:
   workflow_dispatch:
    inputs:
@@ -34,11 +34,11 @@ jobs:
     - name: setup rust
       run: rustup update && rustup target add ${{ matrix.target }}
     - name: clone
-      run: rm -rf attestation-server && git clone -c remote.origin.fetch=refs/remotes/hyyuaeud98fr3dc6n9uaxstpwkj7yasrcskmfdnk6w1intdxbxujxe/heads/*:refs/remotes/canonical/* https://radicle.lsqtech.org/hnrknghnuuedg9tyehzjxwoqt7g53eug84sdy attestation-server
+      run: rm -rf oyster-attestation-server-ed25519 && git clone https://github.com/marlinprotocol/oyster-attestation-server-ed25519
     - name: checkout
-      run: cd attestation-server && git checkout canonical/master
+      run: cd oyster-attestation-server-ed25519 && git checkout master
     - name: build
-      run: cd attestation-server && cargo build --release --target ${{ matrix.target }}
+      run: cd oyster-attestation-server-ed25519 && cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -49,6 +49,6 @@ jobs:
       id: attestation-server
 #       if: ${{github.event.inputs.attestation-server-version != 'X.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum attestation-server/target/${{ matrix.target }}/release/attestation-server | awk '{print $1;}')"
-        upx attestation-server/target/${{ matrix.target }}/release/attestation-server
-        aws s3 cp attestation-server/target/${{ matrix.target }}/release/attestation-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        echo "::set-output name=checksum::$(md5sum oyster-attestation-server-ed25519/target/${{ matrix.target }}/release/oyster-attestation-server-ed25519 | awk '{print $1;}')"
+        upx oyster-attestation-server-ed25519/target/${{ matrix.target }}/release/oyster-attestation-server-ed25519
+        aws s3 cp oyster-attestation-server-ed25519/target/${{ matrix.target }}/release/oyster-attestation-server-ed25519 s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server-ed25519_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
