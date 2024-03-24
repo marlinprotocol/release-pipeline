@@ -18,12 +18,15 @@ jobs:
           GOOS: linux
           GOARCH: amd64
           target: x86_64-unknown-linux-musl
+          cargo: CC=musl-gcc cargo
         - os: 'ubuntu-22.04'
           runs-on: self-hosted
           build_type: Release
           GOOS: linux
           GOARCH: arm64
           target: aarch64-unknown-linux-musl
+          CFLAGS: -mno-outline-atomics
+          cargo: CC=musl-gcc CFLAGS=-mno-outline-atomics cargo
     runs-on: ${{ matrix.runs-on }}
     outputs:
       oyster-attestation-verifier-checksum: ${{steps.oyster-attestation-verifier.outputs.checksum}}
@@ -38,7 +41,7 @@ jobs:
     - name: checkout
       run: cd oyster-attestation-verifier && git checkout master
     - name: build
-      run: cd oyster-attestation-verifier && CC=musl-gcc CFLAGS=-mno-outline-atomics cargo build --release --target ${{ matrix.target }}
+      run: cd oyster-attestation-verifier && ${{ matrix.cargo }} build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
