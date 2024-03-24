@@ -24,6 +24,7 @@ jobs:
           GOOS: linux
           GOARCH: arm64
           target: aarch64-unknown-linux-musl
+          CFLAGS: -mno-outline-atomics
     runs-on: ${{ matrix.runs-on }}
     outputs:
       oyster-attestation-verifier-checksum: ${{steps.oyster-attestation-verifier.outputs.checksum}}
