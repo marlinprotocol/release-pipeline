@@ -24,7 +24,6 @@ jobs:
           GOOS: linux
           GOARCH: arm64
           target: aarch64-unknown-linux-musl
-          CFLAGS: -mno-outline-atomics
     runs-on: ${{ matrix.runs-on }}
     outputs:
       oyster-attestation-verifier-checksum: ${{steps.oyster-attestation-verifier.outputs.checksum}}
@@ -39,7 +38,7 @@ jobs:
     - name: checkout
       run: cd oyster-attestation-verifier && git checkout master
     - name: build
-      run: cd oyster-attestation-verifier && CC=musl-gcc cargo build --release --target ${{ matrix.target }}
+      run: cd oyster-attestation-verifier && CC=musl-gcc CFLAGS=-mno-outline-atomics cargo build --release --target ${{ matrix.target }}
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
