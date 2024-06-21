@@ -52,7 +52,7 @@ jobs:
         sudo mv upx/upx /usr/local/bin/
     - name: upload attestation-server
       id: attestation-server
-#       if: ${{github.event.inputs.attestation-server-version != 'X.Y.Z-beta.U'}}
+#       if: ${{github.event.inputs.attestation-server-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-attestation-server/target/${{ matrix.target }}/release/oyster-attestation-server
         echo "::set-output name=checksum::$(sha256sum oyster-attestation-server/target/${{ matrix.target }}/release/oyster-attestation-server | awk '{print $1;}')"
