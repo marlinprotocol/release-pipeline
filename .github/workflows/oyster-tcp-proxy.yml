@@ -1,48 +1,50 @@
-name: Build tcp proxies
+name: Build oyster-tcp-proxy
 on:
   workflow_dispatch:
    inputs:
     iptv-version:
      description: 'ip to vsock binary version'
      required: false
-     default: 'X.Y.Z-beta.U'
+     default: 'vX.Y.Z-beta.U'
     vtip-version:
      description: 'vsock to ip binary version'
      required: false
-     default: 'X.Y.Z-beta.U'
+     default: 'vX.Y.Z-beta.U'
     iptvt-version:
      description: 'ip to vsock transparent binary version'
      required: false
-     default: 'X.Y.Z-beta.U'
+     default: 'vX.Y.Z-beta.U'
     vtipt-version:
      description: 'vsock to ip transparent binary version'
      required: false
-     default: 'X.Y.Z-beta.U'
+     default: 'vX.Y.Z-beta.U'
     ptvt-version:
      description: 'port to vsock transparent binary version'
      required: false
-     default: 'X.Y.Z-beta.U'
+     default: 'vX.Y.Z-beta.U'
     version-description:
      description: 'description for new version'
      required: false
      default: 'automated'
 jobs:
-  build_proxies_linux:
-    name: Build proxies linux
+  build_linux:
+    name: Build linux
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-22.04'
-          runs-on: 'ubuntu-22.04'
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
+          rust-image: 'ed7795c6eaccae53be35939e883e8c3de0197b21e8eddbd9f04b0c4bc757c094'
           target: x86_64-unknown-linux-musl
-        - os: 'ubuntu-22.04'
-          runs-on: self-hosted
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud-standard-2-arm'
           build_type: Release
           GOOS: linux
           GOARCH: arm64
+          rust-image: 'c428882ff081342a9661fb13a1d059ecdc0b6e979ffec64b80371cf20a2088b0'
           target: aarch64-unknown-linux-musl
     runs-on: ${{ matrix.runs-on }}
     outputs:
@@ -60,52 +62,55 @@ jobs:
         echo vtipt-version ${{github.event.inputs.vtipt-version}}
         echo ptvt-version ${{github.event.inputs.ptvt-version}}
         echo version-description ${{github.event.inputs.version-description}}
-    - name: update rust
-      run: rustup update && rustup target add ${{matrix.target}}
     - name: clone
       run: rm -rf oyster-tcp-proxy && git clone https://github.com/marlinprotocol/oyster-tcp-proxy oyster-tcp-proxy
     - name: checkout
       run: cd oyster-tcp-proxy && git checkout master
     - name: build
-      run: cd oyster-tcp-proxy && cargo build --release --target ${{matrix.target}}
+      run: cd oyster-tcp-proxy && sudo docker run --rm -v `pwd`:/code rust@sha256:${{matrix.rust-image}} /code/build-${{matrix.GOARCH}}.sh
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-southeast-1
+    - name: upx
+      run: |
+        wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{matrix.GOARCH}}_linux.tar.xz -O upx.txz
+        mkdir -p upx && tar -xvf upx.txz --strip-components=1 -C upx
+        sudo mv upx/upx /usr/local/bin/
     - name: upload iptv
       id: iptv
-      if: ${{github.event.inputs.iptv-version != 'X.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.iptv-version != 'vX.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock | awk '{print $1;}')"
         upx oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock
+        echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock | awk '{print $1;}')"
         aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtip
       id: vtip
-      if: ${{github.event.inputs.vtip-version != 'X.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.vtip-version != 'vX.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip | awk '{print $1;}')"
         upx oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip
+        echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip | awk '{print $1;}')"
         aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload iptvt
       id: iptvt
-      if: ${{github.event.inputs.iptvt-version != 'X.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.iptvt-version != 'vX.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent | awk '{print $1;}')"
         upx oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent
+        echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent | awk '{print $1;}')"
         aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtipt
       id: vtipt
-      if: ${{github.event.inputs.vtipt-version != 'X.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.vtipt-version != 'vX.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent | awk '{print $1;}')"
         upx oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent
+        echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent | awk '{print $1;}')"
         aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload ptvt
       id: ptvt
-      if: ${{github.event.inputs.ptvt-version != 'X.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.ptvt-version != 'vX.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent | awk '{print $1;}')"
         upx oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent
+        echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent | awk '{print $1;}')"
         aws s3 cp oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent s3://public.artifacts.marlin.pro/projects/enclaves/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
