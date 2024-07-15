@@ -36,7 +36,7 @@ jobs:
     - name: clone
       run: rm -rf supervisord && git clone https://github.com/ochinchina/supervisord
     - name: checkout
-      run: cd supervisord && git checkout ${{github.events.inputs.supervisord-version}}
+      run: cd supervisord && git checkout ${{github.event.inputs.supervisord-version}}
     - name: download build script
       run: cd supervisord && wget https://raw.githubusercontent.com/marlinprotocol/release-pipeline/master/supervisord-${{matrix.GOARCH}}.sh -O build-${{matrix.GOARCH}}.sh && chmod +x build-${{matrix.GOARCH}}.sh
     - name: build
