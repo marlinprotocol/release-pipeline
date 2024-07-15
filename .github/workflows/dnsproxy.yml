@@ -56,6 +56,6 @@ jobs:
       id: dnsproxy
 #       if: ${{github.event.inputs.dnsproxy-version != 'vX.Y.Z-beta.U'}}
       run: |
-        # sudo upx dnsproxy/dnsproxy
+        sudo upx dnsproxy/dnsproxy
         echo "::set-output name=checksum::$(md5sum dnsproxy/dnsproxy | awk '{print $1;}')"
         aws s3 cp dnsproxy/dnsproxy s3://public.artifacts.marlin.pro/projects/enclaves/dnsproxy_${{github.event.inputs.dnsproxy-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
