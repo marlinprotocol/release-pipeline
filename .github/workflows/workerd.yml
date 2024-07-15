@@ -34,7 +34,7 @@ jobs:
     - name: clone
       run: rm -rf workerd && git clone https://github.com/cloudflare/workerd
     - name: checkout
-      run: cd workerd && git checkout ${{github.events.inputs.workerd-version}}
+      run: cd workerd && git checkout ${{github.event.inputs.workerd-version}}
     - name: build
       run: cd workerd && bazel build --config=thin-lto //src/workerd/server:workerd
     - name: aws credentials
