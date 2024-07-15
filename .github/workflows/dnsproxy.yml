@@ -36,7 +36,7 @@ jobs:
     - name: clone
       run: rm -rf dnsproxy && git clone https://github.com/AdguardTeam/dnsproxy
     - name: checkout
-      run: cd dnsproxy && git checkout ${{github.events.inputs.dnsproxy-version}}
+      run: cd dnsproxy && git checkout ${{github.event.inputs.dnsproxy-version}}
     - name: download build script
       run: cd dnsproxy && wget https://raw.githubusercontent.com/marlinprotocol/release-pipeline/master/dnsproxy-${{matrix.GOARCH}}.sh -O build-${{matrix.GOARCH}}.sh && chmod +x build-${{matrix.GOARCH}}.sh
     - name: build
