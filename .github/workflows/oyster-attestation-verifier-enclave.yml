@@ -37,7 +37,7 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-23.11
     - name: build
-      run: cd oyster-attestation-verifier-enclave && nix build --out-link result-${{matric.GOARCH}} ./${{matrix.GOARCH}} -vL --extra-experimental-features "nix-command flakes"
+      run: cd oyster-attestation-verifier-enclave && nix build --out-link result-${{matrix.GOARCH}} ./${{matrix.GOARCH}} -vL --extra-experimental-features "nix-command flakes"
     - name: aws credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
