@@ -39,12 +39,6 @@ jobs:
       run: cd oyster-attestation-server && git checkout master
     - name: build
       run: cd oyster-attestation-server && sudo docker run --rm -v `pwd`:/code rust@sha256:${{matrix.rust-image}} /code/build-${{matrix.GOARCH}}.sh
-    - name: aws credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
     - name: upx
       run: |
         wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{matrix.GOARCH}}_linux.tar.xz -O upx.txz
@@ -52,8 +46,8 @@ jobs:
         sudo mv upx/upx /usr/local/bin/
     - name: upload attestation-server
       id: attestation-server
-#       if: ${{github.event.inputs.attestation-server-version != 'vX.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.attestation-server-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-attestation-server/target/${{ matrix.target }}/release/oyster-attestation-server
         echo "::set-output name=checksum::$(sha256sum oyster-attestation-server/target/${{ matrix.target }}/release/oyster-attestation-server | awk '{print $1;}')"
-        aws s3 cp oyster-attestation-server/target/${{ matrix.target }}/release/oyster-attestation-server s3://public.artifacts.marlin.pro/projects/enclaves/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-attestation-server/target/${{ matrix.target }}/release/oyster-attestation-server s3://artifacts/oyster/binaries/attestation-server_${{github.event.inputs.attestation-server-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
