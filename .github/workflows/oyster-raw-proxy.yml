@@ -79,25 +79,25 @@ jobs:
       run: |
         sudo upx oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-outgoing
         echo "::set-output name=checksum::$(sha256sum oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-outgoing | awk '{print $1;}')"
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-outgoing s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-raw-outgoing_${{github.event.inputs.iptvo-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-outgoing s3://artifacts/oyster/binaries/ip-to-vsock-raw-outgoing_${{github.event.inputs.iptvo-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtipo
       id: vtipo
       if: ${{github.event.inputs.vtipo-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-outgoing
         echo "::set-output name=checksum::$(sha256sum oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-outgoing | awk '{print $1;}')"
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-outgoing s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-raw-outgoing_${{github.event.inputs.vtipo-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-outgoing s3://artifacts/oyster/binaries/vsock-to-ip-raw-outgoing_${{github.event.inputs.vtipo-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload iptvi
       id: iptvi
       if: ${{github.event.inputs.iptvi-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-incoming
         echo "::set-output name=checksum::$(sha256sum oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-incoming | awk '{print $1;}')"
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-incoming s3://public.artifacts.marlin.pro/projects/enclaves/ip-to-vsock-raw-incoming_${{github.event.inputs.iptvi-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-raw-proxy/target/${{matrix.target}}/release/ip-to-vsock-raw-incoming s3://artifacts/oyster/binaries/ip-to-vsock-raw-incoming_${{github.event.inputs.iptvi-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtipi
       id: vtipi
       if: ${{github.event.inputs.vtipi-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-incoming
         echo "::set-output name=checksum::$(sha256sum oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-incoming | awk '{print $1;}')"
-        aws s3 cp oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-incoming s3://public.artifacts.marlin.pro/projects/enclaves/vsock-to-ip-raw-incoming_${{github.event.inputs.vtipi-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-raw-proxy/target/${{matrix.target}}/release/vsock-to-ip-raw-incoming s3://artifacts/oyster/binaries/vsock-to-ip-raw-incoming_${{github.event.inputs.vtipi-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
