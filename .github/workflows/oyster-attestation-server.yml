@@ -1,4 +1,4 @@
-name: Build attestation server
+name: Build oyster-attestation-server
 on:
   workflow_dispatch:
    inputs:
