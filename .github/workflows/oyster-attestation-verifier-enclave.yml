@@ -38,16 +38,10 @@ jobs:
         nix_path: nixpkgs=channel:nixos-23.11
     - name: build
       run: cd oyster-attestation-verifier-enclave && nix build --out-link result-${{matrix.GOARCH}} ./${{matrix.GOARCH}} -vL --extra-experimental-features "nix-command flakes"
-    - name: aws credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
     - name: upload oyster-attestation-verifier-enclave
       id: oyster-attestation-verifier-enclave
       if: ${{github.event.inputs.oyster-attestation-verifier-enclave-version != 'vX.Y.Z-beta.U'}}
       run: |
         echo "::set-output name=checksum::$(sha256sum oyster-attestation-verifier-enclave/result-${{matrix.GOARCH}}/image.eif | awk '{print $1;}')"
-        aws s3 cp oyster-attestation-verifier-enclave/result-${{matrix.GOARCH}}/image.eif s3://public.artifacts.marlin.pro/eifs/attestation-verifier_${{github.event.inputs.oyster-attestation-verifier-enclave-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}.eif
-        aws s3 cp oyster-attestation-verifier-enclave/result-${{matrix.GOARCH}}/pcr.json s3://public.artifacts.marlin.pro/eifs/attestation-verifier_${{github.event.inputs.oyster-attestation-verifier-enclave-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}.json
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-attestation-verifier-enclave/result-${{matrix.GOARCH}}/image.eif s3://artifacts/oyster/eifs/attestation-verifier_${{github.event.inputs.oyster-attestation-verifier-enclave-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}.eif
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-attestation-verifier-enclave/result-${{matrix.GOARCH}}/pcr.json s3://artifacts/oyster/eifs/attestation-verifier_${{github.event.inputs.oyster-attestation-verifier-enclave-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}.json
