@@ -41,12 +41,6 @@ jobs:
       run: cd supervisord && wget https://raw.githubusercontent.com/marlinprotocol/release-pipeline/master/supervisord-${{matrix.GOARCH}}.sh -O build-${{matrix.GOARCH}}.sh && chmod +x build-${{matrix.GOARCH}}.sh
     - name: build
       run: cd supervisord && sudo docker run --rm -v `pwd`:/code golang@sha256:${{matrix.golang-image}} /code/build-${{matrix.GOARCH}}.sh
-    - name: aws credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
     - name: upx
       run: |
         wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{matrix.GOARCH}}_linux.tar.xz -O upx.txz
@@ -58,4 +52,4 @@ jobs:
       run: |
         sudo upx supervisord/supervisord
         echo "::set-output name=checksum::$(sha256sum supervisord/supervisord | awk '{print $1;}')"
-        aws s3 cp supervisord/supervisord s3://public.artifacts.marlin.pro/projects/enclaves/supervisord_${{github.event.inputs.supervisord-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} supervisord/supervisord s3://artifacts/oyster/binaries/supervisord_${{github.event.inputs.supervisord-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
