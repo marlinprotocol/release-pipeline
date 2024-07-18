@@ -85,32 +85,32 @@ jobs:
       run: |
         sudo upx oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock
         echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock | awk '{print $1;}')"
-        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock s3://artifacts.marlin.org/oyster/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock s3://artifacts.marlin.org/oyster/binaries/ip-to-vsock_${{github.event.inputs.iptv-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtip
       id: vtip
       if: ${{github.event.inputs.vtip-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip
         echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip | awk '{print $1;}')"
-        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip s3://artifacts.marlin.org/oyster/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip s3://artifacts.marlin.org/oyster/binaries/vsock-to-ip_${{github.event.inputs.vtip-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload iptvt
       id: iptvt
       if: ${{github.event.inputs.iptvt-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent
         echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent | awk '{print $1;}')"
-        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent s3://artifacts.marlin.org/oyster/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/ip-to-vsock-transparent s3://artifacts.marlin.org/oyster/binaries/ip-to-vsock-transparent_${{github.event.inputs.iptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload vtipt
       id: vtipt
       if: ${{github.event.inputs.vtipt-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent
         echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent | awk '{print $1;}')"
-        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent s3://artifacts.marlin.org/oyster/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/vsock-to-ip-transparent s3://artifacts.marlin.org/oyster/binaries/vsock-to-ip-transparent_${{github.event.inputs.vtipt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
     - name: upload ptvt
       id: ptvt
       if: ${{github.event.inputs.ptvt-version != 'vX.Y.Z-beta.U'}}
       run: |
         sudo upx oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent
         echo "::set-output name=checksum::$(sha256sum oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent | awk '{print $1;}')"
-        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent s3://artifacts.marlin.org/oyster/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-tcp-proxy/target/${{matrix.target}}/release/port-to-vsock-transparent s3://artifacts.marlin.org/oyster/binaries/port-to-vsock-transparent_${{github.event.inputs.ptvt-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
