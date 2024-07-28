@@ -43,7 +43,7 @@ jobs:
     - name: checkout
       run: cd oyster-nitro-kernels && git checkout ${{github.event.inputs.oyster-nitro-kernels-version}}
     - name: nix
-      run: sudo install -d -m755 -o $(id -u) -g $(id -g) /nix && curl -L https://nixos.org/nix/install | sh
+      run: sudo install -d -m755 -o $(id -u) -g $(id -g) /nix && curl -L https://nixos.org/nix/install | sh && . /home/runner/.nix-profile/etc/profile.d/nix.sh
     - name: build
       run: cd oyster-nitro-kernels && nix-build -A all -v --dry-run
     # - name: upload oyster-nitro-kernels
