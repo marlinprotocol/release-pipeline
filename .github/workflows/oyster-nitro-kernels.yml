@@ -42,7 +42,8 @@ jobs:
       run: rm -rf oyster-nitro-kernels && git clone https://github.com/marlinprotocol/oyster-nitro-kernels
     - name: checkout
       run: cd oyster-nitro-kernels && git checkout ${{github.event.inputs.oyster-nitro-kernels-version}}
-    - uses: cachix/install-nix-action@v27
+    - name: nix
+      run: sudo install -d -m755 -o $(id -u) -g $(id -g) /nix && curl -L https://nixos.org/nix/install | sh
     - name: build
       run: cd oyster-nitro-kernels && nix-build -A all -v --dry-run
     # - name: upload oyster-nitro-kernels
