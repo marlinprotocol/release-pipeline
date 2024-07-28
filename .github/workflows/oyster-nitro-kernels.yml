@@ -44,7 +44,7 @@ jobs:
       run: cd oyster-nitro-kernels && git checkout ${{github.event.inputs.oyster-nitro-kernels-version}}
     - uses: cachix/install-nix-action@v27
       with:
-        nix_path: nixpkgs=channel:nixos-23.11
+        nix_path: nixpkgs=channel:nixos-24.05
     - name: build
       run: cd oyster-nitro-kernels && nix-build -A all -v
     - name: upload oyster-nitro-kernels
