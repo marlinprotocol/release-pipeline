@@ -45,13 +45,13 @@ jobs:
     - name: nix
       run: sudo install -d -m755 -o $(id -u) -g $(id -g) /nix && curl -L https://nixos.org/nix/install | sh
     - name: build
-      run: cd oyster-nitro-kernels && . /home/runner/.nix-profile/etc/profile.d/nix.sh && nix-build -A all -v --dry-run
-    # - name: upload oyster-nitro-kernels
-    #   id: oyster-nitro-kernels
-    #   if: ${{github.event.inputs.oyster-nitro-kernels-version != 'vX.Y.Z-beta.U'}}
-    #   run: |
-    #     AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/${{matrix.KNAME}} s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/${{matrix.KNAME}}
-    #     AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/${{matrix.KNAME}}.config s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/${{matrix.KNAME}}.config
-    #     AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/init s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/init
-    #     AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/linuxkit s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/linuxkit
-    #     AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/nsm.ko s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/nsm.ko
+      run: cd oyster-nitro-kernels && . /home/runner/.nix-profile/etc/profile.d/nix.sh && nix-build -A all -v
+    - name: upload oyster-nitro-kernels
+      id: oyster-nitro-kernels
+      if: ${{github.event.inputs.oyster-nitro-kernels-version != 'vX.Y.Z-beta.U'}}
+      run: |
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/${{matrix.KNAME}} s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/${{matrix.KNAME}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/${{matrix.KNAME}}.config s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/${{matrix.KNAME}}.config
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/init s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/init
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/linuxkit s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/linuxkit
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-kernels/result/${{matrix.KARCH}}/nsm.ko s3://artifacts/oyster/kernels/vanilla_${{github.event.inputs.oyster-nitro-kernels-version}}_${{matrix.GOARCH}}/nsm.ko
