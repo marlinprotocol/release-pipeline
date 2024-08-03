@@ -39,15 +39,8 @@ jobs:
       run: cd oyster-control-plane && git checkout master
     - name: build
       run: cd oyster-control-plane && sudo docker run --rm -v `pwd`:/code rust@sha256:${{matrix.rust-image}} /code/build-${{matrix.GOARCH}}.sh
-    - name: upx
-      run: |
-        wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{matrix.GOARCH}}_linux.tar.xz -O upx.txz
-        mkdir -p upx && tar -xvf upx.txz --strip-components=1 -C upx
-        sudo mv upx/upx /usr/local/bin/
     - name: upload oyster-control-plane
       id: oyster-control-plane
       if: ${{github.event.inputs.oyster-control-plane-version != 'vX.Y.Z-beta.U'}}
       run: |
-        sudo upx oyster-control-plane/target/${{ matrix.target }}/release/control-plane
-        echo "::set-output name=checksum::$(sha256sum oyster-control-plane/target/${{ matrix.target }}/release/control-plane | awk '{print $1;}')"
         AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-control-plane/target/${{ matrix.target }}/release/control-plane s3://artifacts/oyster/binaries/control-plane_${{github.event.inputs.oyster-control-plane-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
