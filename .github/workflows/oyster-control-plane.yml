@@ -1,0 +1,53 @@
+name: Build oyster-control-plane
+on:
+  workflow_dispatch:
+   inputs:
+    oyster-control-plane-version:
+     description: 'oyster-control-plane version'
+#      required: false
+     default: 'vX.Y.Z-beta.U'
+jobs:
+  build_linux:
+    name: Build oyster-control-plane linux
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud'
+          build_type: Release
+          GOOS: linux
+          GOARCH: amd64
+          rust-image: 'ed7795c6eaccae53be35939e883e8c3de0197b21e8eddbd9f04b0c4bc757c094'
+          target: x86_64-unknown-linux-musl
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud-standard-2-arm'
+          build_type: Release
+          GOOS: linux
+          GOARCH: arm64
+          rust-image: 'c428882ff081342a9661fb13a1d059ecdc0b6e979ffec64b80371cf20a2088b0'
+          target: aarch64-unknown-linux-musl
+    runs-on: ${{ matrix.runs-on }}
+    outputs:
+      oyster-control-plane-checksum: ${{steps.oyster-control-plane.outputs.checksum}}
+    steps:
+    - name: echo
+      run: |
+        echo oyster-control-plane-version ${{github.event.inputs.oyster-control-plane-version}}
+    - name: clone
+      run: rm -rf oyster-control-plane && git clone https://github.com/marlinprotocol/oyster-control-plane
+    - name: checkout
+      run: cd oyster-control-plane && git checkout master
+    - name: build
+      run: cd oyster-control-plane && sudo docker run --rm -v `pwd`:/code rust@sha256:${{matrix.rust-image}} /code/build-${{matrix.GOARCH}}.sh
+    - name: upx
+      run: |
+        wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{matrix.GOARCH}}_linux.tar.xz -O upx.txz
+        mkdir -p upx && tar -xvf upx.txz --strip-components=1 -C upx
+        sudo mv upx/upx /usr/local/bin/
+    - name: upload oyster-control-plane
+      id: oyster-control-plane
+      if: ${{github.event.inputs.oyster-control-plane-version != 'vX.Y.Z-beta.U'}}
+      run: |
+        sudo upx oyster-control-plane/target/${{ matrix.target }}/release/control-plane
+        echo "::set-output name=checksum::$(sha256sum oyster-control-plane/target/${{ matrix.target }}/release/control-plane | awk '{print $1;}')"
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-control-plane/target/${{ matrix.target }}/release/control-plane s3://artifacts/oyster/binaries/control-plane_${{github.event.inputs.oyster-control-plane-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
