@@ -20,7 +20,7 @@ jobs:
           rust-image: 'ed7795c6eaccae53be35939e883e8c3de0197b21e8eddbd9f04b0c4bc757c094'
           target: x86_64-unknown-linux-musl
         - os: 'ubuntu-24.04'
-          runs-on: 'ubicloud-standard-2-arm'
+          runs-on: 'ubicloud-standard-8-arm'
           build_type: Release
           GOOS: linux
           GOARCH: arm64
