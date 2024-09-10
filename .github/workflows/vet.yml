@@ -5,24 +5,26 @@ on:
     vet-version:
      description: 'vet version'
 #      required: false
-#      default: 'X.Y.Z-beta.U'
+     default: 'vX.Y.Z-beta.U'
 jobs:
   build_vet_linux:
     name: Build vet linux
     strategy:
       matrix:
         include:
-        - os: 'ubuntu-22.04'
-          runs-on: 'ubuntu-22.04'
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
+          rust-image: 'ed7795c6eaccae53be35939e883e8c3de0197b21e8eddbd9f04b0c4bc757c094'
           target: x86_64-unknown-linux-musl
-        - os: 'ubuntu-22.04'
-          runs-on: self-hosted
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud-standard-2-arm'
           build_type: Release
           GOOS: linux
           GOARCH: arm64
+          rust-image: 'c428882ff081342a9661fb13a1d059ecdc0b6e979ffec64b80371cf20a2088b0'
           target: aarch64-unknown-linux-musl
     runs-on: ${{ matrix.runs-on }}
     outputs:
@@ -38,17 +40,16 @@ jobs:
     - name: checkout
       run: cd vet && git checkout master
     - name: build
-      run: cd vet && cargo build --release --target ${{ matrix.target }}
-    - name: aws credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-southeast-1
+      run: cd vet && sudo docker run --rm -v `pwd`:/code rust@sha256:${{matrix.rust-image}} /code/build-${{matrix.GOARCH}}.sh
+    - name: upx
+      run: |
+        wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{matrix.GOARCH}}_linux.tar.xz -O upx.txz
+        mkdir -p upx && tar -xvf upx.txz --strip-components=1 -C upx
+        sudo mv upx/upx /usr/local/bin/
     - name: upload vet
       id: vet
-#       if: ${{github.event.inputs.vet-version != 'X.Y.Z-beta.U'}}
+      if: ${{github.event.inputs.vet-version != 'vX.Y.Z-beta.U'}}
       run: |
-        echo "::set-output name=checksum::$(md5sum vet/target/${{ matrix.target }}/release/vet | awk '{print $1;}')"
-        upx vet/target/${{ matrix.target }}/release/vet
-        aws s3 cp vet/target/${{ matrix.target }}/release/vet s3://public.artifacts.marlin.pro/projects/enclaves/vet_${{github.event.inputs.vet-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        sudo upx vet/target/${{ matrix.target }}/release/vet
+        echo "::set-output name=checksum::$(sha256sum vet/target/${{ matrix.target }}/release/vet | awk '{print $1;}')"
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} vet/target/${{ matrix.target }}/release/vet s3://artifacts/oyster/binaries/vet_${{github.event.inputs.vet-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
