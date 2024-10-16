@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
         - os: 'ubuntu-24.04'
-          runs-on: 'ubicloud'
+          runs-on: 'ubicloud-standard-8'
           build_type: Release
           GOOS: linux
           GOARCH: amd64
@@ -43,4 +43,4 @@ jobs:
       id: oyster-nitro-logger
       if: ${{github.event.inputs.oyster-nitro-logger-version != 'vX.Y.Z-beta.U'}}
       run: |
-        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-logger/target/${{ matrix.target }}/release/control-plane s3://artifacts/oyster/binaries/control-plane_${{github.event.inputs.oyster-nitro-logger-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
+        AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws s3 cp --endpoint-url ${{secrets.AWS_S3_ENDPOINT}} oyster-nitro-logger/target/${{ matrix.target }}/release/logger s3://artifacts/oyster/binaries/nitro-logger_${{github.event.inputs.oyster-nitro-logger-version}}_${{matrix.GOOS}}_${{matrix.GOARCH}}
