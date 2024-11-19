@@ -1,0 +1,73 @@
+name: Build kalypso-cli binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        default: 'vX.Y.Z'
+
+jobs:
+  build:
+    name: Build kalypso-cli binaries for macOS and Linux
+    strategy:
+      matrix:
+        include:
+          - os: 'ubuntu-latest'
+            runs-on: ubuntu-latest
+            rust-image: 'ed7795c6eaccae53be35939e883e8c3de0197b21e8eddbd9f04b0c4bc757c094'
+            target: x86_64-unknown-linux-musl
+          - os: 'macos-latest'
+            runs-on: macos-latest
+            target: x86_64-apple-darwin
+
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: symbotic-bindings  # Set the branch to `symbotic-bindings`
+
+      - name: Remove .cargo/config.toml for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          rm -f .cargo/config.toml
+
+      - name: Set up Rust (macOS only)
+        if: matrix.os == 'macos-latest'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          profile: minimal
+
+      - name: Build kalypso-cli (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo docker run --rm -v "$(pwd)":/code rust@sha256:${{matrix.rust-image}} \
+          /bin/bash -c "cd /code && cargo build --release --bin kalypso-cli --target ${matrix.target}"
+
+      - name: Build kalypso-cli (macOS)
+        if: matrix.os == 'macos-latest'
+        run: cargo build --release --bin kalypso-cli --target ${{ matrix.target }}
+
+      - name: Install UPX
+        run: |
+          wget https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-${{ matrix.target }}.tar.xz -O upx.txz
+          mkdir -p upx && tar -xvf upx.txz --strip-components=1 -C upx
+          sudo mv upx/upx /usr/local/bin/
+
+      - name: Compress kalypso-cli binary
+        run: |
+          sudo upx target/${{ matrix.target }}/release/kalypso-cli
+
+      - name: Upload kalypso-cli binary to S3
+        id: upload
+        if: ${{ github.event.inputs.version != 'vX.Y.Z' }}
+        run: |
+          echo "::set-output name=checksum::$(sha256sum target/${{ matrix.target }}/release/kalypso-cli | awk '{print $1;}')"
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+          aws s3 cp --endpoint-url ${{ secrets.AWS_S3_ENDPOINT }} \
+          target/${{ matrix.target }}/release/kalypso-cli \
+          s3://artifacts/kalypso/binaries/kalypso-cli_${{ github.event.inputs.version }}_${{ matrix.os }}_${{ matrix.target }}
