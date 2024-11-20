@@ -58,10 +58,8 @@ jobs:
             apt-get install -y musl-dev musl-tools
             if [ '${{ matrix.GOARCH }}' = 'arm64' ]; then
               apt-get install -y gcc-aarch64-linux-musl
-              export CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc
             elif [ '${{ matrix.GOARCH }}' = 'amd64' ]; then
               apt-get install -y musl-gcc
-              export CC_x86_64_unknown_linux_musl=musl-gcc
             fi
             /code/build-${{ matrix.GOARCH }}.sh
           "
