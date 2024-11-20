@@ -1,4 +1,4 @@
-name: Build kalypso-unified and Upload kalypso-cli
+name: Build kalypso-unified
 
 on:
   workflow_dispatch:
