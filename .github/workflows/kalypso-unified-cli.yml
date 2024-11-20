@@ -40,28 +40,31 @@ jobs:
           rm -rf kalypso-unified
           git clone https://github.com/marlinprotocol/kalypso-unified kalypso-unified
 
-      - name: Checkout Branch
-        run: |
-          cd kalypso-unified
-          git checkout symbotic-bindings
-          rm -rf .cargo
-
-          - name: Build Binaries
+          - name: Checkout Branch
           run: |
             cd kalypso-unified
-            sudo docker run --rm -v "$(pwd)":/code rust@sha256:${{ matrix.rust-image }} bash -c "
-              set -e
-              apt-get update
-              apt-get install -y musl-dev musl-tools
-              if [ '${{ matrix.GOARCH }}' = 'arm64' ]; then
-                apt-get install -y gcc-aarch64-linux-musl
-                export CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc
-              elif [ '${{ matrix.GOARCH }}' = 'amd64' ]; then
-                apt-get install -y musl-gcc
-                export CC_x86_64_unknown_linux_musl=musl-gcc
-              fi
-              /code/build-${{ matrix.GOARCH }}.sh
-            "
+            git checkout symbotic-bindings
+            rm -rf .cargo
+  
+      - name: Make Build Script Executable
+        run: chmod +x kalypso-unified/build-${{ matrix.GOARCH }}.sh
+  
+      - name: Build Binaries
+        run: |
+          cd kalypso-unified
+          sudo docker run --rm -v "$(pwd)":/code rust@sha256:${{ matrix.rust-image }} bash -c "
+            set -e
+            apt-get update
+            apt-get install -y musl-dev musl-tools
+            if [ '${{ matrix.GOARCH }}' = 'arm64' ]; then
+              apt-get install -y gcc-aarch64-linux-musl
+              export CC_aarch64_unknown_linux_musl=aarch64-linux-musl-gcc
+            elif [ '${{ matrix.GOARCH }}' = 'amd64' ]; then
+              apt-get install -y musl-gcc
+              export CC_x86_64_unknown_linux_musl=musl-gcc
+            fi
+            /code/build-${{ matrix.GOARCH }}.sh
+          "
 
       - name: Install UPX
         run: |
