@@ -40,11 +40,11 @@ jobs:
           rm -rf kalypso-unified
           git clone https://github.com/marlinprotocol/kalypso-unified kalypso-unified
 
-          - name: Checkout Branch
-          run: |
-            cd kalypso-unified
-            git checkout symbotic-bindings
-            rm -rf .cargo
+      - name: Checkout Branch
+        run: |
+          cd kalypso-unified
+          git checkout symbotic-bindings
+          rm -rf .cargo
   
       - name: Make Build Script Executable
         run: chmod +x kalypso-unified/build-${{ matrix.GOARCH }}.sh
