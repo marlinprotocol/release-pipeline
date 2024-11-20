@@ -47,6 +47,7 @@ jobs:
         run: |
           cd kalypso-unified
           git checkout symbotic-bindings
+          rm -rf .cargo
 
       - name: Build Binaries
         run: |
