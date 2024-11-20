@@ -18,18 +18,18 @@ jobs:
             build_type: Release
             GOOS: linux
             GOARCH: amd64
-            rust-image: 'ed7795c6eaccae53be35939e883e8c3de0197b21e8eddbd9f04b0c4bc757c094'
+            rust-image: '821c41ed8d70347b32c2a3e4779fa0f05354773adf627aa388d0904494e0d21f'
             target: x86_64-unknown-linux-musl
           # - os: 'ubuntu-24.04'
           #   runs-on: 'ubicloud-standard-2-arm'
           #   build_type: Release
           #   GOOS: linux
           #   GOARCH: arm64
-          #   rust-image: 'c428882ff081342a9661fb13a1d059ecdc0b6e979ffec64b80371cf20a2088b0'
+          #   rust-image: 'd9c3c6f1264a547d84560e06ffd79ed7a799ce0bff0980b26cf10d29af888377'
           #   target: aarch64-unknown-linux-musl
     runs-on: ${{ matrix.runs-on }}
     outputs:
-      kalypso-cli-checksum: ${{ steps.kalypso-cliutputs.checksum }}
+      kalypso-cli-checksum: ${{ steps.kalypso-cli.checksum }}
     steps:
       - name: Echo Version
         run: |
