@@ -53,14 +53,6 @@ jobs:
         run: |
           cd kalypso-unified
           sudo docker run --rm -v "$(pwd)":/code rust@sha256:${{ matrix.rust-image }} bash -c "
-            set -e
-            apt-get update
-            apt-get install -y musl-dev musl-tools
-            if [ '${{ matrix.GOARCH }}' = 'arm64' ]; then
-              apt-get install -y gcc-aarch64-linux-musl
-            elif [ '${{ matrix.GOARCH }}' = 'amd64' ]; then
-              apt-get install -y musl-gcc
-            fi
             /code/build-${{ matrix.GOARCH }}.sh
           "
 
