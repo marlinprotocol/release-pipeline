@@ -28,11 +28,10 @@ jobs:
         echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
     - name: Install Nix
       uses: cachix/install-nix-action@v30
-    - name: attic setup
-      run: nix build -vL github:zhaofengli/attic#attic-client && cp ./result/bin/attic . && ./attic login marlin https://nix-cache.marlin.org ${{secrets.ATTIC_TOKEN}}
-    - name: attic
-      run: ./attic watch-store oyster &
+    - name: Cachix
+      uses: cachix/cachix-action@v15
+      with:
+        name: oyster
+        authToken: ${{secrets.CACHIX_AUTH_TOKEN}}
     - name: build
       run: nix build -vL --accept-flake-config github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#musl.attestation.server.default
-    - name: sleep so attic can upload
-      run: sleep 10s
