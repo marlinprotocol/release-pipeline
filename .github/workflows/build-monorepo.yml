@@ -1,4 +1,4 @@
-name: Build attestation-server
+name: Build monorepo
 on:
   workflow_dispatch:
    inputs:
@@ -6,6 +6,9 @@ on:
      description: 'oyster-monorepo revision'
      required: false
      default: 'master'
+    target:
+     description: 'build target'
+     required: true
 jobs:
   build:
     if: github.actor == 'roshanrags'
@@ -30,4 +33,4 @@ jobs:
         name: oyster
         authToken: ${{secrets.CACHIX_AUTH_TOKEN}}
     - name: build
-      run: nix build -vL --accept-flake-config github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#musl.attestation.server.default
+      run: nix build -vL --accept-flake-config github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#${{github.events.inputs.target}}
