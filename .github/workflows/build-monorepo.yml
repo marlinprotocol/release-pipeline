@@ -33,4 +33,4 @@ jobs:
         name: oyster
         authToken: ${{secrets.CACHIX_AUTH_TOKEN}}
     - name: build
-      run: nix build -vL --accept-flake-config github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#${{github.events.inputs.target}}
+      run: nix build -vL --accept-flake-config github:marlinprotocol/oyster-monorepo/${{github.event.inputs.revision}}#${{github.event.inputs.target}}
