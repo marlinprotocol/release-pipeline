@@ -1,0 +1,36 @@
+name: Build attestation-server
+on:
+  workflow_dispatch:
+   inputs:
+    revision:
+     description: 'oyster-monorepo revision'
+     required: false
+     default: 'master'
+jobs:
+  build:
+    if: github.actor == 'roshanrags'
+    name: Build
+    strategy:
+      matrix:
+        include:
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud-standard-2'
+          GOOS: linux
+          GOARCH: amd64
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud-standard-2-arm'
+          GOOS: linux
+          GOARCH: arm64
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - name: echo
+      run: |
+        echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
+    - name: Install Nix
+      uses: cachix/install-nix-action@v30
+    - name: attic
+      run: nix build -vL github:zhaofengli/attic#attic-client && cp ./result/bin/attic . && ./attic login marlin https://nix-cache.marlin.org ${{secrets.ATTIC_TOKEN}} && ./attic watch-store oyster &
+    - name: build
+      run: nix build -vL github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#musl.attestation.server.default
+    - name: sleep so attic can upload
+      run: sleep 10s
