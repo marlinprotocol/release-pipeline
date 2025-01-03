@@ -15,17 +15,13 @@ jobs:
         include:
         - os: 'ubuntu-24.04'
           runs-on: 'ubicloud-standard-2'
-          GOOS: linux
-          GOARCH: amd64
-        # - os: 'ubuntu-24.04'
-        #   runs-on: 'ubicloud-standard-2-arm'
-        #   GOOS: linux
-        #   GOARCH: arm64
+        - os: 'ubuntu-24.04'
+          runs-on: 'ubicloud-standard-2-arm'
     runs-on: ${{ matrix.runs-on }}
     steps:
     - name: echo
       run: |
-        echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
+        echo revision ${{github.event.inputs.revision}}
     - name: Install Nix
       uses: cachix/install-nix-action@v30
     - name: Cachix
