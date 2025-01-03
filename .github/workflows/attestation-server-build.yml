@@ -17,10 +17,10 @@ jobs:
           runs-on: 'ubicloud-standard-2'
           GOOS: linux
           GOARCH: amd64
-        - os: 'ubuntu-24.04'
-          runs-on: 'ubicloud-standard-2-arm'
-          GOOS: linux
-          GOARCH: arm64
+        # - os: 'ubuntu-24.04'
+        #   runs-on: 'ubicloud-standard-2-arm'
+        #   GOOS: linux
+        #   GOARCH: arm64
     runs-on: ${{ matrix.runs-on }}
     steps:
     - name: echo
@@ -28,9 +28,11 @@ jobs:
         echo attestation-server-version ${{github.event.inputs.attestation-server-version}}
     - name: Install Nix
       uses: cachix/install-nix-action@v30
+    - name: attic setup
+      run: nix build -vL github:zhaofengli/attic#attic-client && cp ./result/bin/attic . && ./attic login marlin https://nix-cache.marlin.org ${{secrets.ATTIC_TOKEN}}
     - name: attic
-      run: nix build -vL github:zhaofengli/attic#attic-client && cp ./result/bin/attic . && ./attic login marlin https://nix-cache.marlin.org ${{secrets.ATTIC_TOKEN}} && ./attic watch-store oyster &
+      run: ./attic watch-store oyster &
     - name: build
-      run: nix build -vL github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#musl.attestation.server.default
+      run: nix build -vL --accept-flake-config github:marlinprotocol/oyster-monorepo?rev=${{github.event.inputs.revision}}#musl.attestation.server.default
     - name: sleep so attic can upload
       run: sleep 10s
