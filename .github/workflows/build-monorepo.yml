@@ -17,9 +17,9 @@ jobs:
       matrix:
         include:
         - os: 'ubuntu-24.04'
-          runs-on: 'ubicloud-standard-2'
+          runs-on: 'ubicloud-standard-8'
         - os: 'ubuntu-24.04'
-          runs-on: 'ubicloud-standard-2-arm'
+          runs-on: 'ubicloud-standard-8-arm'
     runs-on: ${{ matrix.runs-on }}
     steps:
     - name: echo
